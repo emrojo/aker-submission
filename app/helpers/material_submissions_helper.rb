@@ -1,14 +1,16 @@
 module MaterialSubmissionsHelper
 def wells_attributes_for(plate)
-  plate.wells.each_with_index.reduce({}) do |memo, list|
-    well,index = list[0],list[1]
-    memo[index.to_s] = {
+  memo = []
+  plate.wells.each_with_index do |well, index|
+    memo.push({
       :id => well.id.to_s,
       :position => well.position,
       :biomaterial_attributes => (well.biomaterial || Biomaterial.new)
-    }
-    memo
+    })
+  end.sort do |w1,w2|
+    w1.id <=> w2.id
   end
+  memo
 end
 
 def plate_attributes_for(labwares)
