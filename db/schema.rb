@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170111170107) do
+ActiveRecord::Schema.define(version: 20170119170909) do
 
   create_table "barcodes", force: :cascade do |t|
     t.string   "barcode_type"
@@ -41,6 +41,14 @@ ActiveRecord::Schema.define(version: 20170111170107) do
     t.string   "email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "label_templates", force: :cascade do |t|
+    t.string   "name",          null: false
+    t.string   "template_type"
+    t.integer  "external_id",   null: false
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
   end
 
   create_table "labware_types", force: :cascade do |t|
@@ -90,16 +98,6 @@ ActiveRecord::Schema.define(version: 20170111170107) do
     t.string   "email"
     t.index ["contact_id"], name: "index_material_submissions_on_contact_id"
     t.index ["labware_type_id"], name: "index_material_submissions_on_labware_type_id"
-  end
-
-  create_table "ownerships", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "set_materials", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "wells", force: :cascade do |t|

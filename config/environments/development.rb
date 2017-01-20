@@ -55,6 +55,7 @@ Rails.application.configure do
   config.action_mailer.delivery_method = :sendmail
   config.action_mailer.default_url_options = { host: 'example.com' }
 
+  config.pmb_uri = ENV.fetch('PMB_URI','http://localhost:10000/v1')
   config.materials_service_url = "http://localhost:5000"
   config.set_url = 'http://localhost:1500/api/v1/sets'
   config.set_url_default_proxy = 'http://localhost:1500'
