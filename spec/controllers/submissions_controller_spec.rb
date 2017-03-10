@@ -178,6 +178,12 @@ RSpec.describe SubmissionsController, type: :controller do
               :headers => {'Content-Type'=>'application/vnd.api+json'}).
          to_return(:status => 200, :body => "{}", :headers => {})
 
+      stub_request(:post, "#{Rails.configuration.set_url}/#{@uuid}/relationships/materials").
+         with(:body => {:data => []}.to_json,
+              :headers => {'Content-Type'=>'application/vnd.api+json'}).
+         to_return(:status => 200, :body => "{}", :headers => {})
+
+
        stub_request(:get, "#{Rails.configuration.set_url}/#{@uuid}/relationships/materials").
          with(:headers => {'Content-Type'=>'application/vnd.api+json'}).
          to_return(:status => 200, :body => "{}", :headers => {})
@@ -188,6 +194,10 @@ RSpec.describe SubmissionsController, type: :controller do
     end
 
     it "does not update the submission state if any steps have not been performed" do
+      stub_request(:patch, "#{Rails.configuration.set_url}/#{@uuid}").
+         with(:body => {data: {type: 'sets', id: "#{@uuid}", attributes: { locked: true}}}.to_json,
+              :headers => {'Accept'=>'application/vnd.api+json'}).
+         to_return(:status => 200, :body => {}.to_json, :headers => {})      
       put :update, step_params(@material_submission, :dispatch)
       @material_submission.reload
       expect(@material_submission.status).not_to eq('active')
