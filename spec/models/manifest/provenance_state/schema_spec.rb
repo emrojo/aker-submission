@@ -1,24 +1,25 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Manifest::ProvenanceState::Schema' do
   let(:manifest) { create :manifest }
-  let(:material_schema) {
-    { "properties" => { "scientific_name" => { "required" => true }, "concentration" => { "required" => false} } }
-  }
-  let(:labware_name) {
-    Rails.configuration.manifest_schema_config["field_labware_name"]
-
-  }
-  let(:position) {
-    Rails.configuration.manifest_schema_config["field_position"]
-  }
+  let(:material_schema) do
+    { 'properties' => { 'scientific_name' => { 'required' => true }, 'concentration' => { 'required' => false } } }
+  end
+  let(:labware_name) do
+    Rails.configuration.manifest_schema_config['field_labware_name']
+  end
+  let(:position) do
+    Rails.configuration.manifest_schema_config['field_position']
+  end
   let(:user) { create :user }
   let(:provenance_state) { Manifest::ProvenanceState.new(manifest, user) }
   let(:schema_accessor) { provenance_state.schema }
 
-  let(:state) {
+  let(:state) do
     {}
-  }
+  end
   before do
     allow(MatconClient::Material).to receive(:schema).and_return(material_schema)
   end
@@ -43,22 +44,22 @@ RSpec.describe 'Manifest::ProvenanceState::Schema' do
       context 'with the list of properties defined as property_updates' do
         context 'when the properties are not present in the material schema' do
           it 'adds them to the manifest schema' do
-            expect(schema_accessor.material_schema["properties"][labware_name]).to eq(nil)
-            expect(schema_accessor.material_schema["properties"][position]).to eq(nil)
+            expect(schema_accessor.material_schema['properties'][labware_name]).to eq(nil)
+            expect(schema_accessor.material_schema['properties'][position]).to eq(nil)
 
-            expect(schema_accessor.state[:schema]["properties"][labware_name]).not_to eq(nil)
-            expect(schema_accessor.state[:schema]["properties"][position]).not_to eq(nil)
+            expect(schema_accessor.state[:schema]['properties'][labware_name]).not_to eq(nil)
+            expect(schema_accessor.state[:schema]['properties'][position]).not_to eq(nil)
           end
         end
         context 'when the properties are defined both in the material and manifest schemas' do
           it 'rewrites the property values from material with the values defined in the manifest schema' do
-            expect(schema_accessor.material_schema["properties"]["scientific_name"]["required"]).to eq(true)
-            expect(schema_accessor.state[:schema]["properties"]["scientific_name"]["required"]).to eq(false)
+            expect(schema_accessor.material_schema['properties']['scientific_name']['required']).to eq(true)
+            expect(schema_accessor.state[:schema]['properties']['scientific_name']['required']).to eq(false)
           end
         end
         context 'when material schema has properties no defined in the manifest schema' do
           it 'copies these properties from the material schema into the manifest schema' do
-            expect(schema_accessor.state[:schema]["properties"]["concentration"]).not_to eq(nil)
+            expect(schema_accessor.state[:schema]['properties']['concentration']).not_to eq(nil)
           end
         end
       end
@@ -69,69 +70,69 @@ RSpec.describe 'Manifest::ProvenanceState::Schema' do
         context 'when the manifest refers to several labware' do
           before do
             allow(schema_accessor).to receive(:labwares).and_return([
-              {
-                labware_index: 0,
-                positions: ["1"],
-                supplier_plate_name: "Labware 1"
-              },
-              {
-                labware_index: 1,
-                positions: ["1"],
-                supplier_plate_name: "Labware 2"
-              }
-            ])
-            schema_accessor.apply({manifest: {labwares: [{}, {}]}})
+                                                                      {
+                                                                        labware_index: 0,
+                                                                        positions: ['1'],
+                                                                        supplier_plate_name: 'Labware 1'
+                                                                      },
+                                                                      {
+                                                                        labware_index: 1,
+                                                                        positions: ['1'],
+                                                                        supplier_plate_name: 'Labware 2'
+                                                                      }
+                                                                    ])
+            schema_accessor.apply(manifest: { labwares: [{}, {}] })
           end
           it 'sets the labware name as required' do
-            expect(schema_accessor.state[:schema]["properties"][labware_name]["required"]).to be_truthy
+            expect(schema_accessor.state[:schema]['properties'][labware_name]['required']).to be_truthy
           end
         end
         context 'when the manifest model refers to just one labware' do
           before do
             allow(schema_accessor).to receive(:labwares).and_return([
-              {
-                labware_index: 0,
-                positions: ["1"],
-                supplier_plate_name: "Labware 1"
-              }
-            ])
+                                                                      {
+                                                                        labware_index: 0,
+                                                                        positions: ['1'],
+                                                                        supplier_plate_name: 'Labware 1'
+                                                                      }
+                                                                    ])
 
-            schema_accessor.apply({manifest: {labwares: [{}]}})
+            schema_accessor.apply(manifest: { labwares: [{}] })
           end
           it 'sets the labware name as not required' do
-            expect(schema_accessor.state[:schema]["properties"][labware_name]["required"]).to be_falsy
+            expect(schema_accessor.state[:schema]['properties'][labware_name]['required']).to be_falsy
           end
         end
         context 'when the manifest model refers has several positions' do
           before do
             allow(schema_accessor).to receive(:labwares).and_return([
-              {
-                labware_index: 0,
-                positions: ["1","2"],
-                supplier_plate_name: "Labware 1"
-              }
-            ])
+                                                                      {
+                                                                        labware_index: 0,
+                                                                        positions: %w[1 2],
+                                                                        supplier_plate_name: 'Labware 1'
+                                                                      }
+                                                                    ])
 
-            schema_accessor.apply({manifest: {labwares: [{positions: ["1", "2"]}, {positions: ["1", "2"]}]}})
+            schema_accessor.apply(manifest: { labwares: [{ positions: %w[1 2] }, { positions: %w[1 2] }] })
           end
           it 'sets the position as required' do
-            expect(schema_accessor.state[:schema]["properties"][position]["required"]).to be_truthy
+            expect(schema_accessor.state[:schema]['properties'][position]['required']).to be_truthy
           end
         end
         context 'when the manifest model refers has just one position' do
           before do
             allow(schema_accessor).to receive(:labwares).and_return([
-              {
-                labware_index: 0,
-                positions: ["1"],
-                supplier_plate_name: "Labware 1"
-              }
-            ])
+                                                                      {
+                                                                        labware_index: 0,
+                                                                        positions: ['1'],
+                                                                        supplier_plate_name: 'Labware 1'
+                                                                      }
+                                                                    ])
 
-            schema_accessor.apply({manifest: {labwares: [{positions: ["1"]}, {positions: ["1"]}]}})
+            schema_accessor.apply(manifest: { labwares: [{ positions: ['1'] }, { positions: ['1'] }] })
           end
           it 'sets the position as not required' do
-            expect(schema_accessor.state[:schema]["properties"][position]["required"]).to be_falsy
+            expect(schema_accessor.state[:schema]['properties'][position]['required']).to be_falsy
           end
         end
       end

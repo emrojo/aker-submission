@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.config.after_initialize do
   MatconClient::Model.site = Rails.application.config.material_url
 

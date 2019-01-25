@@ -1,11 +1,12 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Contact, type: :model do
-
   describe '#fullname_and_email' do
-    let(:contact) { build(:contact, fullname: "Jeff", email: "jeff@jeff") }
-    it "should be correct" do
-      expect(contact.fullname_and_email).to eq ("Jeff <jeff@jeff>")
+    let(:contact) { build(:contact, fullname: 'Jeff', email: 'jeff@jeff') }
+    it 'should be correct' do
+      expect(contact.fullname_and_email).to eq 'Jeff <jeff@jeff>'
     end
   end
 
@@ -32,5 +33,4 @@ RSpec.describe Contact, type: :model do
       expect(build(:contact, email: '   JEFF@JEFF  ')).to be_valid
     end
   end
-
 end

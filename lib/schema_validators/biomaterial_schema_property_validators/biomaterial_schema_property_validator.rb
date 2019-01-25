@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module SchemaValidators
   module BiomaterialSchemaPropertyValidators
-
     class BiomaterialSchemaPropertyValidator
       attr_accessor :schema_validator
       attr_accessor :property_name
@@ -12,9 +13,7 @@ module SchemaValidators
         @schema_validator = schema_validator
       end
 
-      def error_messages
-        schema_validator.error_messages
-      end
+      delegate :error_messages, to: :schema_validator
 
       def field_data(bio_data)
         field_data_for_property(property_name, bio_data)
@@ -22,13 +21,13 @@ module SchemaValidators
 
       # Adds a validation error to the given error_messages.
       def add_error(labware_index, address, field, msg)
-        i = error_messages.index { |x| x[:labwareIndex]==labware_index && x[:address]==address }
+        i = error_messages.index { |x| x[:labwareIndex] == labware_index && x[:address] == address }
         if i.nil?
           error_message = {
             errors: {},
             labwareIndex: labware_index,
             address: address,
-            update_successful: true,
+            update_successful: true
           }
           error_messages.push(error_message)
         else
@@ -40,10 +39,9 @@ module SchemaValidators
       def field_data_for_property(property_name, bio_data)
         field_data = bio_data[property_name]
         field_data = field_data.strip if field_data
-        field_data = nil if field_data and field_data.empty?    
-        field_data  
+        field_data = nil if field_data&.empty?
+        field_data
       end
-
     end
   end
 end

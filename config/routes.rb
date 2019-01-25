@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 
@@ -13,13 +15,13 @@ Rails.application.routes.draw do
   resources :material_receptions
 
   namespace :manifests do
-    resources :print, only: [:index, :create]
-    resources :dispatch, only: [:index, :create]
+    resources :print, only: %i[index create]
+    resources :dispatch, only: %i[index create]
     resources :upload, only: [:create]
     resources :state, only: [:update]
   end
 
-  resources :manifests, only: [:index, :new, :destroy, :show] do
+  resources :manifests, only: %i[index new destroy show] do
     resources :build, controller: 'submissions'
     put :biomaterial_data, controller: 'submissions'
   end
@@ -33,5 +35,4 @@ Rails.application.routes.draw do
     get '/print', to: redirect('/manifests/print')
     get '/dispatch', to: redirect('/manifests/dispatch')
   end
-
 end

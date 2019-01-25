@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Contact < ApplicationRecord
   has_many :manifests
 
@@ -12,20 +14,15 @@ class Contact < ApplicationRecord
 
   def sanitise_fullname
     if fullname
-      sanitised = fullname.strip.gsub(/\s+/,' ')
-      if sanitised != fullname
-        self.fullname = sanitised
-      end
+      sanitised = fullname.strip.gsub(/\s+/, ' ')
+      self.fullname = sanitised if sanitised != fullname
     end
   end
 
   def sanitise_email
     if email
       sanitised = email.strip.downcase
-      if sanitised != email
-        self.email = sanitised
-      end
+      self.email = sanitised if sanitised != email
     end
   end
-
 end

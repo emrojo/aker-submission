@@ -1,21 +1,23 @@
+# frozen_string_literal: true
+
 module SchemaValidators
   module BiomaterialSchemaPropertyValidators
     class TaxonIdValidator < BiomaterialSchemaPropertyValidator
       attr_reader :taxonomies_memoized
 
-      def self.is_applicable?(property_name, property_data)
+      def self.is_applicable?(property_name, _property_data)
         property_name == 'taxon_id'
       end
 
       def is_integer(val)
-        Integer(val) rescue false
+        Integer(val)
+      rescue
+        false
       end
 
       def find_by_taxon_id(taxon_id)
-        if taxonomies_memoized.nil?
-          @taxonomies_memoized = {}
-        end
-        if !taxonomies_memoized[taxon_id]
+        @taxonomies_memoized = {} if taxonomies_memoized.nil?
+        unless taxonomies_memoized[taxon_id]
           taxonomies_memoized[taxon_id] = TaxonomyClient::Taxonomy.find(taxon_id)
         end
         taxonomies_memoized[taxon_id]
@@ -23,22 +25,22 @@ module SchemaValidators
 
       def validate_scientific_name(taxon_id, scientific_name, labware_index, address, property_name)
         begin
-          obtained_value = find_by_taxon_id(taxon_id).scientificName
+          obtained_value = find_by(taxon_id: taxon_id).scientificName
         rescue TaxonomyClient::Errors::BadRequest => e
           add_error(labware_index, address, property_name,
-            "The request to the EBI Taxonomy service is not valid")
+                    'The request to the EBI Taxonomy service is not valid')
           return false
         rescue TaxonomyClient::Errors::NotFound => e
           add_error(labware_index, address, property_name,
-            "The Taxon Id provided (#{taxon_id}) was not found in the EBI Taxonomy service")
+                    "The Taxon Id provided (#{taxon_id}) was not found in the EBI Taxonomy service")
           return false
         end
 
         if scientific_name
           unless scientific_name == obtained_value
             add_error(labware_index, address, property_name,
-              "The Taxon Id provided (#{taxon_id}) does not match the scientific name provided '#{scientific_name}'.
-              The taxonomy service indicates it should be '#{obtained_value}.")
+                      "The Taxon Id provided (#{taxon_id}) does not match the scientific name provided '#{scientific_name}'.
+                      The taxonomy service indicates it should be '#{obtained_value}.")
             return false
           end
         end
@@ -50,7 +52,7 @@ module SchemaValidators
 
         taxon_id = field_data_for_property('taxon_id', bio_data)
         unless is_integer(taxon_id)
-          add_error(labware_index, address, property_name, "The taxon id provided is not a number")
+          add_error(labware_index, address, property_name, 'The taxon id provided is not a number')
           return false
         end
         scientific_name = field_data_for_property('scientific_name', bio_data)

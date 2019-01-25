@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Manifest::ProvenanceState
   attr_reader :state, :manifest, :user
   attr_reader :schema, :mapping, :content, :manifest_model
@@ -31,8 +33,6 @@ class Manifest::ProvenanceState
     @state
   end
 
-
-
   def _build_state
     {
       id: @manifest_model.id,
@@ -41,5 +41,4 @@ class Manifest::ProvenanceState
       mapping: nil
     }
   end
-
 end

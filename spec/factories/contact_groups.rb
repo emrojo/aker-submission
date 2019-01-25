@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :contact_group do
     sequence(:name) { |n| "group#{n}" }

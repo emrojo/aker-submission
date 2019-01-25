@@ -1,13 +1,14 @@
+# frozen_string_literal: true
+
 # Service to deal with inputting HMDMC for human samples
 class EthicsService
-
   def initialize(manifest, flash)
     @manifest = manifest
     @flash = flash
   end
 
   def update(ethics_params, by_user)
-    if !@manifest.any_human_material?
+    unless @manifest.any_human_material?
       return error 'This Manifest is not listed as including human material.'
     end
 
@@ -19,10 +20,10 @@ class EthicsService
       return error 'Either "Not required" or an HMDMC number must be specified per sample.'
     end
 
-    @manifest.labwares.each { |lw| lw.save! }
+    @manifest.labwares.each(&:save!)
     @manifest.update_attributes!(status: 'dispatch')
 
-    return true
+    true
   end
 
   private

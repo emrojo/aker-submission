@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'taxonomy_client'
 
 Rails.application.config.after_initialize do
-  TaxonomyClient::Model.site = "https://www.ebi.ac.uk"
+  TaxonomyClient::Model.site = 'https://www.ebi.ac.uk'
 
   TaxonomyClient::Model.connection do |connection|
     # Remove deprecation warning by sending empty hash
@@ -12,7 +14,7 @@ Rails.application.config.after_initialize do
   end
 
   # Only use Sanger proxy when on system's infrastructure
-  # TODO: remove if production is on OpenStack
+  #  TODO: remove if production is on OpenStack
   if Rails.env.production?
     TaxonomyClient::Taxonomy.connection.faraday.proxy = Rails.configuration.aker_deployment_default_proxy
   end

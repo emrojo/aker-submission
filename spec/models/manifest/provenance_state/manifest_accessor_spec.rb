@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Manifest::ProvenanceState::ManifestAccessor' do
@@ -5,38 +7,36 @@ RSpec.describe 'Manifest::ProvenanceState::ManifestAccessor' do
   let(:user) { create :user }
   let(:provenance_state) { Manifest::ProvenanceState.new(manifest, user) }
   let(:manifest_accessor) { provenance_state.manifest }
-  let(:state) {
+  let(:state) do
     {}
-  }
+  end
   context '#apply' do
-    let(:tube_type) {
+    let(:tube_type) do
       create(:labware_type,
-                          num_of_cols: 1,
-                          num_of_rows: 1,
-                          row_is_alpha: false,
-                          col_is_alpha: false)
-    }
-    let(:plate_type) {
+             num_of_cols: 1,
+             num_of_rows: 1,
+             row_is_alpha: false,
+             col_is_alpha: false)
+    end
+    let(:plate_type) do
       create(:labware_type,
-                          num_of_cols: 2,
-                          num_of_rows: 1,
-                          row_is_alpha: true,
-                          col_is_alpha: false)
-    }
+             num_of_cols: 2,
+             num_of_rows: 1,
+             row_is_alpha: true,
+             col_is_alpha: false)
+    end
 
     context 'when the manifest does not have any labware defined' do
       before do
         manifest_accessor.apply(state)
       end
       it 'does generate an empty labwares list' do
-        expect(manifest_accessor.state).to include({
-          manifest: {
-            manifest_id: manifest.id,
-            selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
-            labwares: [
-            ]
-          }
-        })
+        expect(manifest_accessor.state).to include(manifest: {
+                                                     manifest_id: manifest.id,
+                                                     selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
+                                                     labwares: [
+                                                     ]
+                                                   })
       end
     end
 
@@ -48,17 +48,14 @@ RSpec.describe 'Manifest::ProvenanceState::ManifestAccessor' do
       end
 
       it 'generates labware with one position' do
-
-        expect(manifest_accessor.state).to include({
-          manifest: {
-            manifest_id: manifest.id,
-            selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
-            labwares: [
-              { labware_index: "1", positions: ["1"], supplier_plate_name: "Labware 1"},
-              { labware_index: "2", positions: ["1"], supplier_plate_name: "Labware 2"}
-            ]
-          }
-        })
+        expect(manifest_accessor.state).to include(manifest: {
+                                                     manifest_id: manifest.id,
+                                                     selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
+                                                     labwares: [
+                                                       { labware_index: '1', positions: ['1'], supplier_plate_name: 'Labware 1' },
+                                                       { labware_index: '2', positions: ['1'], supplier_plate_name: 'Labware 2' }
+                                                     ]
+                                                   })
       end
     end
 
@@ -69,19 +66,15 @@ RSpec.describe 'Manifest::ProvenanceState::ManifestAccessor' do
         manifest_accessor.apply(state)
       end
 
-
       it 'generates labware with several positions' do
-
-        expect(manifest_accessor.state).to include({
-          manifest: {
-            manifest_id: manifest.id,
-            selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
-            labwares: [
-              { labware_index: "1", positions: ["A:1", "A:2"], supplier_plate_name: "Labware 1"},
-              { labware_index: "2", positions: ["A:1", "A:2"], supplier_plate_name: "Labware 2"}
-            ]
-          }
-        })
+        expect(manifest_accessor.state).to include(manifest: {
+                                                     manifest_id: manifest.id,
+                                                     selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
+                                                     labwares: [
+                                                       { labware_index: '1', positions: ['A:1', 'A:2'], supplier_plate_name: 'Labware 1' },
+                                                       { labware_index: '2', positions: ['A:1', 'A:2'], supplier_plate_name: 'Labware 2' }
+                                                     ]
+                                                   })
       end
     end
 
@@ -89,23 +82,21 @@ RSpec.describe 'Manifest::ProvenanceState::ManifestAccessor' do
       before do
         manifest.update_attributes(labware_type: plate_type)
         labwares = 2.times.map do |idx|
-          create :labware, supplier_plate_name: "plate #{idx+1}"
+          create :labware, supplier_plate_name: "plate #{idx + 1}"
         end
         manifest.update_attributes(labwares: labwares)
         manifest_accessor.apply(state)
       end
 
       it 'generates supplier plate name ' do
-        expect(manifest_accessor.state).to include({
-          manifest: {
-            manifest_id: manifest.id,
-            selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
-            labwares: [
-              { labware_index: "1", supplier_plate_name: "plate 1", positions: ["A:1", "A:2"]},
-              { labware_index: "2", supplier_plate_name: "plate 2", positions: ["A:1", "A:2"]}
-            ]
-          }
-        })
+        expect(manifest_accessor.state).to include(manifest: {
+                                                     manifest_id: manifest.id,
+                                                     selectedTabPosition: 0, show_hmdmc_warning: false, valid: true,
+                                                     labwares: [
+                                                       { labware_index: '1', supplier_plate_name: 'plate 1', positions: ['A:1', 'A:2'] },
+                                                       { labware_index: '2', supplier_plate_name: 'plate 2', positions: ['A:1', 'A:2'] }
+                                                     ]
+                                                   })
       end
     end
   end

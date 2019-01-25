@@ -1,26 +1,21 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe TransformedResponse do
-
   let(:transformed_response) { TransformedResponse.new(transformer: transformer) }
 
   describe '#initialization' do
-
     context 'when transformer is not provided' do
-
       it 'raises an error' do
         expect { TransformedResponse.new }.to raise_error(KeyError)
       end
-
     end
-
   end
 
   describe '#response' do
-
     context 'when transformation is successful' do
-
-      let(:transformer) { double("Transformer", transform: true, contents: 'some csv data') }
+      let(:transformer) { double('Transformer', transform: true, contents: 'some csv data') }
 
       it 'has status set to :ok' do
         expect(transformed_response.response[:status]).to eql(:ok)
@@ -32,9 +27,8 @@ RSpec.describe TransformedResponse do
     end
 
     context 'when transformation is not successful' do
-
-      let(:errors) { double("Errors", full_messages: "Some helpful error messages") }
-      let(:transformer) { double("Transformer", transform: false, errors: errors) }
+      let(:errors) { double('Errors', full_messages: 'Some helpful error messages') }
+      let(:transformer) { double('Transformer', transform: false, errors: errors) }
 
       it 'has status set to :unprocessable_entity' do
         expect(transformed_response.response[:status]).to eql(:unprocessable_entity)
@@ -45,7 +39,5 @@ RSpec.describe TransformedResponse do
         expect(transformed_response.response[:json][:errors]).to eql('Some helpful error messages')
       end
     end
-
   end
-
 end

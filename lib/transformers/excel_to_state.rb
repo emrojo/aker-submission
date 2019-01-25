@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Transformers
   class ExcelToState < ExcelToArray
     def initialize(options)
@@ -12,7 +14,7 @@ module Transformers
         errors.add(:base, e)
       end
 
-      return false
+      false
     end
 
     def build_state(raw_content)

@@ -1,14 +1,15 @@
+# frozen_string_literal: true
+
 module LDAPGroupReader
   class << self
-
-    def fetch_members(name, options={})
-      options = {active_people_only: true}.merge(options)
+    def fetch_members(name, options = {})
+      options = { active_people_only: true }.merge(options)
       connection = make_connection
       member_dns = fetch_member_dns(connection, name)
       fetch_contact_details(connection, member_dns, options)
     end
 
-  private
+    private
 
     def fetch_member_dns(connection, name)
       group_name_filter = Net::LDAP::Filter.eq('cn', name)
@@ -29,10 +30,8 @@ module LDAPGroupReader
       return [] if uids.empty?
       user_filters = uids.map { |uid| Net::LDAP::Filter.eq('uid', uid) }
       filter = user_filters.reduce(:|)
-      if options[:active_people_only]
-        filter &= active_people_filter
-      end
-      attrs = ['cn', 'mail']
+      filter &= active_people_filter if options[:active_people_only]
+      attrs = %w[cn mail]
       results = connection.search(filter: filter, base: person_base, attributes: attrs)
       results.map { |r| Contact.new(fullname: r.cn.first, email: r.mail.first) }
     end

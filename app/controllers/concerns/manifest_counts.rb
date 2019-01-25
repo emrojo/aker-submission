@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ManifestCounts
   extend ActiveSupport::Concern
 
@@ -22,5 +24,4 @@ module ManifestCounts
   def dispatched_count
     @dispatched_count ||= Manifest.dispatched.count
   end
-
 end

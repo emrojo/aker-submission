@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.config.after_initialize do
   StampClient::Base.site = Rails.application.config.stamp_url
 

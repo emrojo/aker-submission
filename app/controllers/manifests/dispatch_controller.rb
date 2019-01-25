@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Manifests::DispatchController < ApplicationController
   include ManifestCounts
 
@@ -6,28 +8,28 @@ class Manifests::DispatchController < ApplicationController
   def index
     respond_to do |format|
       format.html
-      format.js { render template: "manifests/dispatch/_form" }
+      format.js { render template: 'manifests/dispatch/_form' }
     end
   end
 
   def create
     if params[:manifest_ids].blank?
-      flash.now[:alert] = "You must select at least one Manifest to dispatch."
+      flash.now[:alert] = 'You must select at least one Manifest to dispatch.'
     elsif dispatch_manifests
       flash.now[:success] = success_message
     else
-      flash.now[:alert] = "Manifests could not be dispatched."
+      flash.now[:alert] = 'Manifests could not be dispatched.'
     end
     render :index
   end
 
-private
+  private
 
   def manifests
     @manifests ||= if show_dispatched?
-        Manifest.includes(:labware_type).dispatched.order(dispatch_date: :desc)
-      else
-        Manifest.includes(:labware_type).printed.not_dispatched
+                     Manifest.includes(:labware_type).dispatched.order(dispatch_date: :desc)
+                   else
+                     Manifest.includes(:labware_type).printed.not_dispatched
       end
   end
 
@@ -41,12 +43,10 @@ private
   end
 
   def dispatch_manifests
-    begin
-      update_dispatch_dates!
-      return true
-    rescue
-      return false
-    end
+    update_dispatch_dates!
+    return true
+  rescue
+    return false
   end
 
   def update_dispatch_dates!
@@ -62,5 +62,4 @@ private
   def selected_manifest_ids
     selected_manifests.map(&:id).join(', ')
   end
-
 end

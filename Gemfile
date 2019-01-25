@@ -29,6 +29,7 @@ gem 'pg', '~> 0.18' # pg version 1.0.0 is not compatible with Rails 5.1.4
 gem 'pry'
 gem 'puma', '~> 3.0' # Use Puma as the app server
 gem 'rails', '~> 5.2.0'
+gem 'react-rails'
 gem 'request_store'
 gem 'roo', '~> 2.7.0'
 gem 'sassc-rails', '~> 1.3'
@@ -39,18 +40,17 @@ gem 'uglifier', '~> 3.2' # Use Uglifier as compressor for JavaScript assets
 gem 'uuid'
 gem 'webpacker', '~> 3.5', '>= 3.5.3'
 gem 'webpacker-react'
-gem 'react-rails'
 gem 'wicked'
 
 ###
 # Sanger gems
 ###
+gem 'aker-set-client', github: 'sanger/aker-set-client'
+gem 'aker-taxonomy-client', github: 'sanger/aker-taxonomy-client'
 gem 'aker_credentials_gem', github: 'sanger/aker-credentials'
 gem 'aker_permission_gem', github: 'sanger/aker-permission'
-gem 'aker-set-client', github: 'sanger/aker-set-client'
-gem 'aker_stamp_client', github: 'sanger/aker-stamp-client'
 gem 'aker_shared_navbar', github: 'sanger/aker-shared-navbar'
-gem 'aker-taxonomy-client', github: 'sanger/aker-taxonomy-client'
+gem 'aker_stamp_client', github: 'sanger/aker-stamp-client'
 gem 'bootstrap-sass', '~> 3.3.6', github: 'sanger/bootstrap-sass'
 gem 'json_api_client', github: 'sanger/json_api_client'
 gem 'matcon_client', github: 'sanger/aker-matcon-client'
@@ -81,7 +81,7 @@ end
 
 group :test do
   gem 'capybara', '>= 2.15', '< 4.0'
-  gem 'chromedriver-helper' #, '~> 1.0'
+  gem 'chromedriver-helper' # , '~> 1.0'
   gem 'poltergeist'
   gem 'rake'
   gem 'rspec-json_expectations'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MaterialReceptionsController < ApplicationController
   before_action :set_labware, only: :create
 

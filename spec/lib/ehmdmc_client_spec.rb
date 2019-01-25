@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 require 'ehmdmc_client'
@@ -223,7 +225,7 @@ RSpec.describe 'EHMDMCClient' do
               obj.load_message(type_of_message: :infrastructure_message, facility: :info, text: nil, validated: true)
             end
             it 'marks the message as valid ' do
-             expect(obj.valid?).to eq(true)
+              expect(obj.valid?).to eq(true)
             end
             it 'identifies the message as validated' do
               expect(obj.is_validated?).to eq(true)

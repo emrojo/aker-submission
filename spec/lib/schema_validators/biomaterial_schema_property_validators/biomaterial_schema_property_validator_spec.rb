@@ -1,14 +1,16 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 require 'schema_validators'
 
 RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::BiomaterialSchemaPropertyValidator do
   let(:validator) { double('validator') }
-  let(:prop_data) { {'common_name': 'a common name', 'supplier_name': '   some text copied from excel    ', 'decription': ''}.as_json  }
+  let(:prop_data) { { 'common_name': 'a common name', 'supplier_name': '   some text copied from excel    ', 'decription': '' }.as_json }
   let(:prop_name) { 'scientific name' }
-  let(:prop_validator) { 
-    SchemaValidators::BiomaterialSchemaPropertyValidators::BiomaterialSchemaPropertyValidator.new(validator, prop_name, prop_data) 
-  }
+  let(:prop_validator) do
+    SchemaValidators::BiomaterialSchemaPropertyValidators::BiomaterialSchemaPropertyValidator.new(validator, prop_name, prop_data)
+  end
 
   context '#field_data_for_property' do
     it 'returns the property value if the value is not empty' do
@@ -19,7 +21,7 @@ RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::Biomateria
     end
     it 'returns the property value without whitespaces at both sides' do
       expect(prop_validator.field_data_for_property('decription', prop_data)).to eq(nil)
-    end    
+    end
   end
 
   context '#error_messages' do
@@ -30,13 +32,13 @@ RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::Biomateria
   end
 
   context '#add_error' do
-    let(:errors) {
+    let(:errors) do
       [
-        {labwareIndex: 1, address: '1', errors: {}},
-        {labwareIndex: 1, address: '2', errors: {}},
-        {labwareIndex: 2, address: '1', errors: {}}
+        { labwareIndex: 1, address: '1', errors: {} },
+        { labwareIndex: 1, address: '2', errors: {} },
+        { labwareIndex: 2, address: '1', errors: {} }
       ]
-    }
+    end
 
     context 'when adding an error to the slot of a labware that already exists' do
       it 'adds the error in the corresponding element of the list of errors' do

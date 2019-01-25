@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Printer < ApplicationRecord
   include Printables::Group
 
@@ -8,10 +10,11 @@ class Printer < ApplicationRecord
   before_save :sanitise_name
 
   def self.PLATE_TEMPLATE
-    "aker_code128_96plate"
+    'aker_code128_96plate'
   end
+
   def self.TUBE_TEMPLATE
-    "aker_code128_1dtube"
+    'aker_code128_1dtube'
   end
 
   def print_manifests(manifests)
@@ -20,7 +23,7 @@ class Printer < ApplicationRecord
   end
 
   def print_printables(printables)
-    if label_type=='Plate'
+    if label_type == 'Plate'
       print_plates(name, Printer.PLATE_TEMPLATE, printables)
     else
       print_tubes(name, Printer.TUBE_TEMPLATE, printables)
@@ -34,15 +37,14 @@ class Printer < ApplicationRecord
   def sanitise_name
     if name
       sanitised = name.strip.gsub(/\s+/, ' ')
-      if sanitised != name
-        self.name = sanitised
-      end
+      self.name = sanitised if sanitised != name
     end
   end
 
-private
+  private
+
   def manifest_to_printables(manifest)
-    manifest.labwares.map.with_index(1) do |lw,i|
+    manifest.labwares.map.with_index(1) do |lw, i|
       {
         barcode: lw.barcode,
         sanger_human_barcode: lw.barcode,
@@ -51,7 +53,7 @@ private
         sub_id: manifest.id,
         number: i,
         total_number: manifest.labwares.length,
-        num_prints: lw.print_count+1,
+        num_prints: lw.print_count + 1
       }
     end
   end

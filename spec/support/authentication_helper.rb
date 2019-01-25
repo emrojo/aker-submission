@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module AuthenticationHelper
   def current_user
     @current_user ||= create(:user)

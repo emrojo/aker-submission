@@ -1,7 +1,11 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :manifest do
-    labware_type {|lt| lt.association(:labware_type, num_of_cols: 1, num_of_rows: 1,
-      row_is_alpha: true, col_is_alpha: true)}
+    labware_type do |lt|
+      lt.association(:labware_type, num_of_cols: 1, num_of_rows: 1,
+                                    row_is_alpha: true, col_is_alpha: true)
+    end
     owner_email { 'owner@sanger.ac.uk' }
     contact
     supply_labwares { true }
@@ -9,11 +13,11 @@ FactoryBot.define do
     supply_decappers { true }
 
     trait :active do
-      status { "active" }
+      status { 'active' }
     end
 
     trait :printed do
-      status { "printed" }
+      status { 'printed' }
     end
 
     trait :dispatched do
@@ -22,6 +26,6 @@ FactoryBot.define do
 
     factory :active_manifest, traits: [:active]
     factory :printed_manifest, traits: [:printed]
-    factory :dispatched_manifest, traits: [:printed, :dispatched]
+    factory :dispatched_manifest, traits: %i[printed dispatched]
   end
 end

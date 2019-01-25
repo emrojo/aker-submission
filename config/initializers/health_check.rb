@@ -1,5 +1,6 @@
-HealthCheck.setup do |config|
+# frozen_string_literal: true
 
+HealthCheck.setup do |config|
   # uri prefix (no leading slash)
   config.uri = 'health'
 
@@ -28,7 +29,7 @@ HealthCheck.setup do |config|
   # config.standard_checks = [ 'database', 'migrations', 'custom' ]
 
   # Or to exclude one check:
-  config.standard_checks -= [ 'emailconf' ]
+  config.standard_checks -= ['emailconf']
 
   # You can set what tests are run with the 'full' or 'all' parameter
   # config.full_checks = ['database', 'migrations', 'custom', 'email', 'cache', 'redis', 'resque-redis', 'sidekiq-redis', 's3']

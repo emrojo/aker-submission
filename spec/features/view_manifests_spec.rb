@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.feature "View Manifests", type: :feature do
-
+RSpec.feature 'View Manifests', type: :feature do
   let(:manifest) { create(:active_manifest) }
 
   before do
@@ -12,5 +13,4 @@ RSpec.feature "View Manifests", type: :feature do
   it 'displays a title of "Manifest :id"' do
     expect(page).to have_text("Manifest #{manifest.id}")
   end
-
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Manifest::ProvenanceState::StoreAccessor < Manifest::ProvenanceState::Accessor
   delegate :manifest_schema, to: :provenance_state
   delegate :user, to: :provenance_state
@@ -14,37 +16,33 @@ class Manifest::ProvenanceState::StoreAccessor < Manifest::ProvenanceState::Acce
 
   def updates_for(obj)
     return [] if obj.nil?
-    obj.keys.reduce({}) do |memo_labware, labware_key|
-      if obj[labware_key][:addresses]
-        memo_labware[labware_key.to_s] = {
-          "contents" =>  obj[labware_key][:addresses].keys.reduce({}) do |memo_address, address_key|
-            memo_address[address_key] = obj[labware_key][:addresses][address_key][:fields].keys.reduce({}) do |memo_fields, field_key|
-              memo_fields[field_key] = obj[labware_key][:addresses][address_key][:fields][field_key][:value]
-              memo_fields
-            end
-            memo_address
+    obj.keys.each_with_object({}) do |labware_key, memo_labware|
+      next unless obj[labware_key][:addresses]
+      memo_labware[labware_key.to_s] = {
+        'contents' =>  obj[labware_key][:addresses].keys.each_with_object({}) do |address_key, memo_address|
+          memo_address[address_key] = obj[labware_key][:addresses][address_key][:fields].keys.each_with_object({}) do |field_key, memo_fields|
+            memo_fields[field_key] = obj[labware_key][:addresses][address_key][:fields][field_key][:value]
           end
-        }
-      end
-      memo_labware
+        end
+      }
     end
   end
 
   def update(updates)
     ActiveRecord::Base.transaction do
-      if updates && !updates.empty?
+      if updates.present?
         provenance = ProvenanceService.new(manifest_schema)
         success, messages = provenance.set_biomaterial_data(manifest_model, updates, user)
         apply_messages(messages)
 
-        if success #&& !params["manifest"]["change_tab"]
+        if success # && !params["manifest"]["change_tab"]
           success = manifest_model.update_attributes(
             status: (manifest_model&.any_human_material_no_hmdmc? ? 'ethics' : 'dispatch')
           )
         end
 
-        if (!success &&
-            (manifest_model.status == 'dispatch' || manifest_model.status == 'ethics'))
+        if !success &&
+           (manifest_model.status == 'dispatch' || manifest_model.status == 'ethics')
           # If the given provenance is incomplete or wrong, make sure they're not in a later step
           #   (because they could have gone back and incorrected the material data).
           manifest_model.update_attributes(status: :provenance)
@@ -56,13 +54,12 @@ class Manifest::ProvenanceState::StoreAccessor < Manifest::ProvenanceState::Acce
 
   def add_message(labware_index, address, field, text)
     state_access[:structured][:messages] = [] unless state_access[:structured][:messages]
-    state_access[:structured][:messages].push({level: "ERROR",
-      text: text, labware_index: labware_index, address: address, field: field
-      })
-    #if labware_index && address && field
+    state_access[:structured][:messages].push(level: 'ERROR',
+                                              text: text, labware_index: labware_index, address: address, field: field)
+    # if labware_index && address && field
     #  build_keys(@state, [:content, :structured, :labwares, labware_index, :addresses, address, :fields, field, :messages])
     #  state_access[:structured][:labwares][labware_index][:addresses][address][:fields][field][:messages] = [text]
-    #end
+    # end
   end
 
   def clean_errors
@@ -88,5 +85,4 @@ class Manifest::ProvenanceState::StoreAccessor < Manifest::ProvenanceState::Acce
       end
     end
   end
-
 end

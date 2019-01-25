@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'ldap_group_reader'
 
 class ContactGroup < ApplicationRecord
@@ -11,9 +13,7 @@ class ContactGroup < ApplicationRecord
   end
 
   def self.all_contacts
-    if Rails.configuration.fake_ldap
-      return Contact.all.to_a
-    end
+    return Contact.all.to_a if Rails.configuration.fake_ldap
     group_contacts = ContactGroup.all.flat_map(&:members).uniq(&:email).map do |contact|
       Contact.create_with(fullname: contact.fullname).find_or_create_by(email: contact.email)
     end
@@ -24,9 +24,7 @@ class ContactGroup < ApplicationRecord
   def sanitise_name
     if name
       sanitised = name.strip.downcase
-      if sanitised != name
-        self.name = sanitised
-      end
+      self.name = sanitised if sanitised != name
     end
   end
 end

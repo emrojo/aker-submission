@@ -1,10 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'jwt'
 
 RSpec.describe 'Application', type: :feature do
-
   describe 'login link' do
-
     context 'when sending a jwt' do
       let(:jwt) { JWT.encode({ data: { 'email' => 'other@here.com', 'groups' => %w[world team252] } }, Rails.configuration.jwt_secret_key, 'HS256') }
 
@@ -21,19 +21,18 @@ RSpec.describe 'Application', type: :feature do
 
       it "appends '| Aker' to material submission title" do
         visit manifests_path
-        expect(page).to have_content("My Manifests")
+        expect(page).to have_content('My Manifests')
       end
 
       it "appends '| Aker' to completed submission title" do
         visit manifests_print_index_path
-        expect(page).to have_content("Dispatch Labware")
+        expect(page).to have_content('Dispatch Labware')
       end
 
       it "appends '| Aker' to material receptions title" do
         visit material_receptions_path
-        expect(page).to have_content("Material Reception")
+        expect(page).to have_content('Material Reception')
       end
-
     end
   end
 end

@@ -1,15 +1,15 @@
+# frozen_string_literal: true
+
 class Labware < ApplicationRecord
   belongs_to :manifest
   has_one :material_reception
 
   delegate :num_of_rows, :num_of_cols, :col_is_alpha, :row_is_alpha, to: :labware_type
 
-  def labware_type
-    manifest.labware_type
-  end
+  delegate :labware_type, to: :manifest
 
   def increment_print_count!
-    update_attributes(print_count: print_count+1)
+    update_attributes(print_count: print_count + 1)
   end
 
   def size
@@ -21,7 +21,7 @@ class Labware < ApplicationRecord
   end
 
   def barcode_dispatched?
-    manifest && manifest.dispatched?
+    manifest&.dispatched?
   end
 
   def received?
@@ -29,38 +29,36 @@ class Labware < ApplicationRecord
   end
 
   def positions
-    if (!col_is_alpha && !row_is_alpha)
-      return (1..size).map(&:to_s)
-    end
+    return (1..size).map(&:to_s) if !col_is_alpha && !row_is_alpha
 
-    if col_is_alpha
-      x = ("A"..("A".ord + num_of_cols - 1).chr).to_a
-    else
-      x = (1..num_of_cols).map(&:to_s)
-    end
+    x = if col_is_alpha
+          ('A'..('A'.ord + num_of_cols - 1).chr).to_a
+        else
+          (1..num_of_cols).map(&:to_s)
+        end
 
-    if row_is_alpha
-      y = ("A"..("A".ord + num_of_rows - 1).chr).to_a
-    else
-      y = (1..num_of_rows).map(&:to_s)
-    end
+    y = if row_is_alpha
+          ('A'..('A'.ord + num_of_rows - 1).chr).to_a
+        else
+          (1..num_of_rows).map(&:to_s)
+        end
 
-    x.product(y).map { |xi,yi| yi+':'+xi }
+    x.product(y).map { |xi, yi| yi + ':' + xi }
   end
 
   # Determine if there is any any human material in this labware
   def any_human_material?
-    contents && contents.any? { |address, data| material_is_human?(data) }
+    contents&.any? { |_address, data| material_is_human?(data) }
   end
 
   # Determine if there is any any human material, in this labware, without a HMDMC number set
   def any_human_material_no_hmdmc?
-    contents && contents.any? { |address, data| material_is_human_no_hmdmc?(data) }
+    contents&.any? { |_address, data| material_is_human_no_hmdmc?(data) }
   end
 
   def ethical?
     return true unless contents
-    contents.all? { |address, data| check_ethics(data) }
+    contents.all? { |_address, data| check_ethics(data) }
   end
 
   def set_hmdmc_not_required(username)
@@ -69,7 +67,7 @@ class Labware < ApplicationRecord
 
   def clear_hmdmc
     return if contents.nil?
-    contents.each do |address, data|
+    contents.each do |_address, data|
       data.delete('hmdmc')
       data.delete('hmdmc_set_by')
       data.delete('hmdmc_not_required_confirmed_by')
@@ -87,7 +85,7 @@ class Labware < ApplicationRecord
 
   # Returns a set of all of the unique HMDMC values for the labware
   def hmdmc_set
-    hmdmcs = Set.new()
+    hmdmcs = Set.new
     return hmdmcs if contents.nil?
     contents.each do |_k, v|
       h = material_is_human?(v) && v['hmdmc']
@@ -97,7 +95,7 @@ class Labware < ApplicationRecord
   end
 
   def confirmed_no_hmdmc?
-    contents && contents.any? do |_k, v|
+    contents&.any? do |_k, v|
       material_is_human?(v) && v['hmdmc_not_required_confirmed_by'].present?
     end
   end
@@ -136,7 +134,7 @@ class Labware < ApplicationRecord
   # Determine if the given material/sample is a human or "homo sapien" sample
   def material_is_human?(material)
     species = material['scientific_name']
-    species.present? && species.strip.downcase == 'homo sapiens'
+    species.present? && species.strip.casecmp('homo sapiens').zero?
   end
 
   # TODO: This should be changed to use the taxon_id when it is incorporated
@@ -145,7 +143,7 @@ class Labware < ApplicationRecord
   def material_is_human_no_hmdmc?(material)
     species = material['scientific_name']
     hmdmc = material['hmdmc']
-    species.present? && species.strip.downcase == 'homo sapiens' && hmdmc.blank?
+    species.present? && species.strip.casecmp('homo sapiens').zero? && hmdmc.blank?
   end
 
   def check_ethics(data)

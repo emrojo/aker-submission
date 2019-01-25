@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'webmock/rspec'
 
@@ -8,26 +10,26 @@ RSpec.describe :ethics_service do
     submission = double(
       'manifest',
       labwares: [lw],
-      any_human_material?: true,
+      any_human_material?: true
     )
     allow(submission).to receive(:set_hmdmc_not_required)
     allow(submission).to receive(:update_attributes!)
     submission
   end
 
-  let(:flash) { Hash.new }
+  let(:flash) { {} }
 
   let(:service) { EthicsService.new(submission, flash) }
 
   let(:user) { 'dirk@sanger.ac.uk' }
 
   describe '#update' do
-
     def stub_ehmdmc(hmdmc, status_code)
       stub_request(
         :get,
-        "#{Rails.configuration.ehmdmc_url}?hmdmc=#{hmdmc.sub('/','_')}")
-          .to_return(status: status_code)
+        "#{Rails.configuration.ehmdmc_url}?hmdmc=#{hmdmc.sub('/', '_')}"
+      )
+        .to_return(status: status_code)
     end
 
     def run(params)

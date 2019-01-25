@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module SchemaValidators
   module BiomaterialSchemaPropertyValidators
     class UniqueValuesValidator < BiomaterialSchemaPropertyValidator
-
-      def self.is_applicable?(property_name, property_data)
+      def self.is_applicable?(_property_name, property_data)
         property_data['unique_value'] == true
       end
 
@@ -23,19 +24,19 @@ module SchemaValidators
       end
 
       private
-      def prepare_memoized_values(labware_index, property_name)
+
+      def prepare_memoized_values(_labware_index, property_name)
         @memoized_values = {} if @memoized_values.nil?
-        @memoized_values[property_name] = [] unless @memoized_values[property_name]        
+        @memoized_values[property_name] = [] unless @memoized_values[property_name]
       end
 
-      def add_memoized_value(labware_index, property_name, value)
+      def add_memoized_value(_labware_index, property_name, value)
         @memoized_values[property_name].push(value)
       end
 
-      def is_duplicated?(labware_index, property_name, value)
+      def is_duplicated?(_labware_index, property_name, value)
         @memoized_values[property_name].include?(value)
       end
-
     end
   end
 end

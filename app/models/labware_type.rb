@@ -1,5 +1,6 @@
-class LabwareType < ApplicationRecord
+# frozen_string_literal: true
 
+class LabwareType < ApplicationRecord
   validates :name, presence: true
   validates :num_of_cols, presence: true, numericality: { integer: true, greater_than: 0 }
   validates :num_of_rows, presence: true, numericality: { integer: true, greater_than: 0 }
@@ -16,10 +17,7 @@ class LabwareType < ApplicationRecord
   def sanitise_name
     if name
       sanitised = name.strip.gsub(/\s+/, ' ')
-      if sanitised != name
-        self.name = sanitised
-      end
+      self.name = sanitised if sanitised != name
     end
   end
-
 end

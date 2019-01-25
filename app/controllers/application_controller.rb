@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'event_message'
 
 class ApplicationController < ActionController::Base
@@ -19,9 +21,8 @@ class ApplicationController < ActionController::Base
   helper_method :current_user
 
   def check_ssr_membership
-    if !current_user.groups.any? { |group| group.in? Rails.configuration.ssr_groups }
+    if current_user.groups.none? { |group| group.in? Rails.configuration.ssr_groups }
       render :permission_denied
     end
   end
-
 end

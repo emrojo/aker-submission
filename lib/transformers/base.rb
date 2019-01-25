@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Transformers convert content from a file from one form to another e.g. Excel Spreadsheet --> CSV
 #
 # It has one primary method: #transform, which performs the actual transformation
@@ -11,7 +13,6 @@
 
 module Transformers
   class Base
-
     extend ActiveModel::Naming
     attr_reader :errors, :contents
 

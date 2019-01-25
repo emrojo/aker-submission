@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'faraday'
 
 module EHMDMCClient
-
   class Validation
     # This class will store the message for the error produced by the HMDMC service provider,
     # depending on the type of error it will generate a different content. Its purpose is to solve
@@ -80,11 +81,11 @@ module EHMDMCClient
       log
 
       # Needs to return self
-      return self
+      self
     end
 
     def to_json
-      { valid: @valid, error_message: @error_message }.reject{ |_k, v| v.nil? }.to_json
+      { valid: @valid, error_message: @error_message }.reject { |_k, v| v.nil? }.to_json
     end
 
     def set_as_valid
@@ -136,12 +137,10 @@ module EHMDMCClient
   end
 
   def self.get_response_for_hmdmc(hmdmc)
-    begin
-      r = connection.get('?hmdmc=' + sanitise(hmdmc))
-      return r
-    rescue Faraday::ConnectionFailed => e
-      return nil
-    end
+    r = connection.get('?hmdmc=' + sanitise(hmdmc))
+    return r
+  rescue Faraday::ConnectionFailed => e
+    return nil
   end
 
   def self.validate_hmdmc(hmdmc)

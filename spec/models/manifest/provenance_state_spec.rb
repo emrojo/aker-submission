@@ -1,93 +1,92 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe 'Manifest::ProvenanceState' do
   let(:manifest) { create :manifest }
-  let(:material_schema) {
-    { "properties" => { "scientific_name" => { "required" => true }, "concentration" => { "required" => false} } }
-  }
-  let(:labware_name) {
-    Rails.configuration.manifest_schema_config["field_labware_name"]
-
-  }
-  let(:position) {
-    Rails.configuration.manifest_schema_config["field_position"]
-  }
+  let(:material_schema) do
+    { 'properties' => { 'scientific_name' => { 'required' => true }, 'concentration' => { 'required' => false } } }
+  end
+  let(:labware_name) do
+    Rails.configuration.manifest_schema_config['field_labware_name']
+  end
+  let(:position) do
+    Rails.configuration.manifest_schema_config['field_position']
+  end
   let(:user) { create :user }
   let(:provenance_state) { Manifest::ProvenanceState.new(manifest, user) }
   context '#apply' do
     context 'with an empty state' do
-      let(:tube_type) {
+      let(:tube_type) do
         create(:labware_type,
-                            num_of_cols: 1,
-                            num_of_rows: 1,
-                            row_is_alpha: false,
-                            col_is_alpha: false)
-      }
+               num_of_cols: 1,
+               num_of_rows: 1,
+               row_is_alpha: false,
+               col_is_alpha: false)
+      end
 
       before do
         manifest.update_attributes(labware_type: tube_type)
-        manifest.update_attributes(labwares: 3.times.map{ create :labware })
+        manifest.update_attributes(labwares: 3.times.map { create :labware })
         allow(MatconClient::Material).to receive(:schema).and_return(material_schema)
       end
 
       it 'generates a right state' do
-        expect(provenance_state.apply({})[:manifest]).to include({
-          :manifest_id=>manifest.id, :labwares=>[
-            {:labware_index=>"1", :positions=>["1"], :supplier_plate_name => "Labware 1"},
-            {:labware_index=>"2", :positions=>["1"], :supplier_plate_name => "Labware 2"},
-            {:labware_index=>"3", :positions=>["1"], :supplier_plate_name => "Labware 3"}]
-          })
+        expect(provenance_state.apply({})[:manifest]).to include(manifest_id: manifest.id, labwares: [
+                                                                   { labware_index: '1', positions: ['1'], supplier_plate_name: 'Labware 1' },
+                                                                   { labware_index: '2', positions: ['1'], supplier_plate_name: 'Labware 2' },
+                                                                   { labware_index: '3', positions: ['1'], supplier_plate_name: 'Labware 3' }
+                                                                 ])
       end
     end
 
     context 'with a normal state' do
-      let(:state) {
+      let(:state) do
         {
           mapping: mapping,
           content: content,
           schema: schema
         }
-      }
+      end
 
-      let(:schema) {
+      let(:schema) do
         {
-          "show_on_form"=> ["taxon_id","scientific_name","supplier_name","gender","is_tumour"],
-          "type"=>"object",
-          "properties"=>{
-            "is_tumour"=>{
-              "show_on_form"=>true,"friendly_name"=>"Tumour?","required"=>false,
-              "field_name_regex"=>"^(?:is[-_ ]+)?tumou?r\\??$","type"=>"string"
+          'show_on_form' => %w[taxon_id scientific_name supplier_name gender is_tumour],
+          'type' => 'object',
+          'properties' => {
+            'is_tumour' => {
+              'show_on_form' => true, 'friendly_name' => 'Tumour?', 'required' => false,
+              'field_name_regex' => '^(?:is[-_ ]+)?tumou?r\\??$', 'type' => 'string'
             },
-            "scientific_name"=>{
-              "show_on_form"=>true,"friendly_name"=>"Scientific Name","required"=>false,
-              "field_name_regex"=>"^scientific(?:[-_ ]*name)?$","type"=>"string"
+            'scientific_name' => {
+              'show_on_form' => true, 'friendly_name' => 'Scientific Name', 'required' => false,
+              'field_name_regex' => '^scientific(?:[-_ ]*name)?$', 'type' => 'string'
             },
-            "taxon_id"=>{
-              "show_on_form"=>true,"friendly_name"=>"Taxon ID","required"=>false,
-              "field_name_regex"=>"^taxon(?:[-_ ]*id)?$","type"=>"string"
+            'taxon_id' => {
+              'show_on_form' => true, 'friendly_name' => 'Taxon ID', 'required' => false,
+              'field_name_regex' => '^taxon(?:[-_ ]*id)?$', 'type' => 'string'
             },
-            "supplier_name"=>{
-              "show_on_form"=>true,"friendly_name"=>"Supplier Name","required"=>true,
-              "field_name_regex"=>"^supplier[-_ ]*name$","type"=>"string"
+            'supplier_name' => {
+              'show_on_form' => true, 'friendly_name' => 'Supplier Name', 'required' => true,
+              'field_name_regex' => '^supplier[-_ ]*name$', 'type' => 'string'
             },
-            "gender"=>{
-              "show_on_form"=>true,"friendly_name"=>"Gender","required"=>false,
-              "field_name_regex"=>"^(?:gender|sex)$","type"=>"string"
+            'gender' => {
+              'show_on_form' => true, 'friendly_name' => 'Gender', 'required' => false,
+              'field_name_regex' => '^(?:gender|sex)$', 'type' => 'string'
             }
           }
         }
-
-      }
-      let(:content) {
+      end
+      let(:content) do
         {
           raw: [
-              {"plate_id" => "Labware 1", "position" => "A:1", "is_tumour" => "", "scientific_name" => "", "taxon_id" => "", "supplier_name" => "", "gender" => ""}
+            { 'plate_id' => 'Labware 1', 'position' => 'A:1', 'is_tumour' => '', 'scientific_name' => '', 'taxon_id' => '', 'supplier_name' => '', 'gender' => '' }
           ],
-          structured: { labwares: { "Labware 1" => { addresses: { "A:1"=>  { fields:
-            {"is_tumour" => {value: ""}, "scientific_name" => {value: ""}, "taxon_id" => {value: ""}, "supplier_name" => {value: ""}, "gender" => {value: ""}}
-        } } } } } }
-      }
-      let(:mapping) {
+          structured: { labwares: { 'Labware 1' => { addresses: { 'A:1' => { fields:
+            { 'is_tumour' => { value: '' }, 'scientific_name' => { value: '' }, 'taxon_id' => { value: '' }, 'supplier_name' => { value: '' }, 'gender' => { value: '' } } } } } } }
+        }
+      end
+      let(:mapping) do
         {
           expected: [],
           observed: [], matched: [
@@ -96,7 +95,7 @@ RSpec.describe 'Manifest::ProvenanceState' do
             { expected: 'gender', observed: 'gender' }
           ]
         }
-      }
+      end
       before do
         allow(MatconClient::Material).to receive(:schema).and_return(material_schema)
         manifest.update_attributes(labwares: 1.times.map { create :labware })
@@ -114,7 +113,6 @@ RSpec.describe 'Manifest::ProvenanceState' do
           provenance_state.apply(state)
         end
 
-
         it 'returns back the same state' do
           expect(provenance_state.state).to include(state)
         end
@@ -123,58 +121,56 @@ RSpec.describe 'Manifest::ProvenanceState' do
         before do
           allow(MatconClient::Material).to receive(:schema).and_return(material_schema)
           manifest.update_attributes(labwares: 1.times.map { create :labware })
-
         end
 
-        let(:content) {
+        let(:content) do
           {
             raw: [
-                {"plate_id" => "Labware 1", "position" => "A:1", "is_tumour" => "", "scientific_name" => "", "taxon_id" => "", "supplier_name" => "", "gender" => ""},
-                {"plate_id" => "Labware 2", "position" => "A:1", "is_tumour" => "", "scientific_name" => "", "taxon_id" => "", "supplier_name" => "", "gender" => ""}
+              { 'plate_id' => 'Labware 1', 'position' => 'A:1', 'is_tumour' => '', 'scientific_name' => '', 'taxon_id' => '', 'supplier_name' => '', 'gender' => '' },
+              { 'plate_id' => 'Labware 2', 'position' => 'A:1', 'is_tumour' => '', 'scientific_name' => '', 'taxon_id' => '', 'supplier_name' => '', 'gender' => '' }
             ],
             structured: { labwares: {
-              "Labware 1" => { addresses: { "A:1"=>  { fields:
-              {"is_tumour" => {value: ""}, "scientific_name" => {value: ""}, "taxon_id" => {value: ""},
-              "supplier_name" => {value: ""}, "gender" => {value: ""}}}}},
-              "Labware 2" => { addresses: { "A:1"=>  { fields:
-              {"is_tumour" => {value: ""}, "scientific_name" => {value: ""}, "taxon_id" => {value: ""},
-              "supplier_name" => {value: ""}, "gender" => {value: ""}}}}}
+              'Labware 1' => { addresses: { 'A:1' => { fields:
+              { 'is_tumour' => { value: '' }, 'scientific_name' => { value: '' }, 'taxon_id' => { value: '' },
+                'supplier_name' => { value: '' }, 'gender' => { value: '' } } } } },
+              'Labware 2' => { addresses: { 'A:1' => { fields:
+              { 'is_tumour' => { value: '' }, 'scientific_name' => { value: '' }, 'taxon_id' => { value: '' },
+                'supplier_name' => { value: '' }, 'gender' => { value: '' } } } } }
 
-          } } }
-        }
-        it 'raises an error' do
-          expect{provenance_state.apply(state)}.to raise_error(Manifest::ProvenanceState::ContentAccessor::WrongNumberLabwares)
+            } }
+          }
         end
-
+        it 'raises an error' do
+          expect { provenance_state.apply(state) }.to raise_error(Manifest::ProvenanceState::ContentAccessor::WrongNumberLabwares)
+        end
       end
 
       context 'when file defines less labwares than the manifest created' do
         before do
           allow(MatconClient::Material).to receive(:schema).and_return(material_schema)
           manifest.update_attributes(labwares: 3.times.map { create :labware })
-
         end
 
-        let(:content) {
+        let(:content) do
           {
             raw: [
-                {"plate_id" => "Labware 1", "position" => "A:1", "is_tumour" => "", "scientific_name" => "", "taxon_id" => "", "supplier_name" => "", "gender" => ""},
-                {"plate_id" => "Labware 2", "position" => "A:1", "is_tumour" => "", "scientific_name" => "", "taxon_id" => "", "supplier_name" => "", "gender" => ""}
+              { 'plate_id' => 'Labware 1', 'position' => 'A:1', 'is_tumour' => '', 'scientific_name' => '', 'taxon_id' => '', 'supplier_name' => '', 'gender' => '' },
+              { 'plate_id' => 'Labware 2', 'position' => 'A:1', 'is_tumour' => '', 'scientific_name' => '', 'taxon_id' => '', 'supplier_name' => '', 'gender' => '' }
             ],
             structured: { labwares: {
-              "Labware 1" => { addresses: { "A:1"=>  { fields:
-              {"is_tumour" => {value: ""}, "scientific_name" => {value: ""}, "taxon_id" => {value: ""},
-              "supplier_name" => {value: ""}, "gender" => {value: ""}}}}},
-              "Labware 2" => { addresses: { "A:1"=>  { fields:
-              {"is_tumour" => {value: ""}, "scientific_name" => {value: ""}, "taxon_id" => {value: ""},
-              "supplier_name" => {value: ""}, "gender" => {value: ""}}}}}
+              'Labware 1' => { addresses: { 'A:1' => { fields:
+              { 'is_tumour' => { value: '' }, 'scientific_name' => { value: '' }, 'taxon_id' => { value: '' },
+                'supplier_name' => { value: '' }, 'gender' => { value: '' } } } } },
+              'Labware 2' => { addresses: { 'A:1' => { fields:
+              { 'is_tumour' => { value: '' }, 'scientific_name' => { value: '' }, 'taxon_id' => { value: '' },
+                'supplier_name' => { value: '' }, 'gender' => { value: '' } } } } }
 
-          } } }
-        }
-        it 'raises an error' do
-          expect{provenance_state.apply(state)}.to raise_error(Manifest::ProvenanceState::ContentAccessor::WrongNumberLabwares)
+            } }
+          }
         end
-
+        it 'raises an error' do
+          expect { provenance_state.apply(state) }.to raise_error(Manifest::ProvenanceState::ContentAccessor::WrongNumberLabwares)
+        end
       end
     end
   end

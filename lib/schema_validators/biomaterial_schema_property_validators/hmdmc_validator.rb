@@ -1,10 +1,11 @@
+# frozen_string_literal: true
+
 require 'ehmdmc_client'
 
 module SchemaValidators
   module BiomaterialSchemaPropertyValidators
     class HmdmcValidator < BiomaterialSchemaPropertyValidator
-
-      def self.is_applicable?(property_name, property_data)
+      def self.is_applicable?(property_name, _property_data)
         property_name == 'hmdmc'
       end
 
@@ -14,25 +15,22 @@ module SchemaValidators
         # Only allow human material/samples to have HMDMC numbers
         # TODO: Change to taxon_id
         species = field_data_for_property('scientific_name', bio_data)
-        unless species.present? && species.strip.downcase == 'homo sapiens'
+        unless species.present? && species.strip.casecmp('homo sapiens').zero?
           return 'Only human material are to have HMDMC numbers associated.'
         end
         # Check format validity
-        unless hmdmc_number.match(/^[0-9]{2}\/[0-9]{3,4}$/)
+        unless hmdmc_number.match?(/^[0-9]{2}\/[0-9]{3,4}$/)
           return 'The HMDMC number must be of the format ##/####.'
         end
         # Check the actual number with the HMDMC service
         validation = EHMDMCClient.validate_hmdmc(hmdmc_number)
-        unless validation.valid?
-          return validation.error_message
-        end
+        return validation.error_message unless validation.valid?
       end
-
 
       def validate(labware_index, address, bio_data)
         # Check HMDMC server-side
         hmdmc_error = check_hmdmc(field_data(bio_data), bio_data)
-        unless hmdmc_error.blank?
+        if hmdmc_error.present?
           add_error(labware_index,
                     address,
                     property_name,

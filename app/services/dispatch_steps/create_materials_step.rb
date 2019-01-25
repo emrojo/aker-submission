@@ -10,7 +10,7 @@ module DispatchSteps
     def valid_bio_data(bio_data)
       config = Rails.application.config.manifest_schema_config
       bio_data.reject do |k|
-        (k==config["field_labware_name"]) || (k==config["field_position"]) || (k=='plate_id')
+        (k == config['field_labware_name']) || (k == config['field_position']) || (k == 'plate_id')
       end
     end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ApplicationHelper
   def title(page_name)
     "#{page_name.strip} | Aker"

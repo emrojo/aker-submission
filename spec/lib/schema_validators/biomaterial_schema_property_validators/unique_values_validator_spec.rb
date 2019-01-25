@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::UniqueValuesValidator do
@@ -6,7 +8,6 @@ RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::UniqueValu
   let(:class_name) { SchemaValidators::BiomaterialSchemaPropertyValidators::UniqueValuesValidator }
 
   context 'self.is_applicable' do
-
     context 'when the property \'unique_value\' is set to true' do
       let(:prop_data) { { 'description': '', 'unique_value': true }.as_json }
 
@@ -31,12 +32,11 @@ RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::UniqueValu
     end
   end
   context '#validate' do
-    
-    let(:bio_data) { {'myprop': '333'}.as_json }
-    let(:another_bio_data) { {'myprop': '4444'}.as_json }
-    let(:prop_validator) { 
-      class_name.new(validator, prop_name, prop_data) 
-    }
+    let(:bio_data) { { 'myprop': '333' }.as_json }
+    let(:another_bio_data) { { 'myprop': '4444' }.as_json }
+    let(:prop_validator) do
+      class_name.new(validator, prop_name, prop_data)
+    end
     before do
       allow(prop_validator).to receive(:add_error)
     end
@@ -55,13 +55,13 @@ RSpec.describe SchemaValidators::BiomaterialSchemaPropertyValidators::UniqueValu
       it 'returns false' do
         expect(prop_validator.validate(1, 'A:1', bio_data)).to eq(true)
         expect(prop_validator.validate(2, 'B:1', bio_data)).to eq(false)
-      end        
+      end
     end
     context 'when there are no duplicates' do
       it 'returns true' do
         expect(prop_validator.validate(1, 'A:1', bio_data)).to eq(true)
-        expect(prop_validator.validate(1, 'B:1', another_bio_data)).to eq(true)          
-      end        
+        expect(prop_validator.validate(1, 'B:1', another_bio_data)).to eq(true)
+      end
     end
   end
 end

@@ -1,17 +1,15 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'webmock/rspec'
 
-
-RSpec.shared_examples "displays an error" do |errorMessage|
-
+RSpec.shared_examples 'displays an error' do |errorMessage|
   it 'displays an error' do
     expect(page.find('#page-error-alert')).to have_text(errorMessage)
   end
-
 end
 
-RSpec.feature "Upload Manifests", type: :feature, js: true do
-
+RSpec.feature 'Upload Manifests', type: :feature, js: true do
   include StubHelper
 
   let(:number_of_containers_required) { 3 }
@@ -25,7 +23,7 @@ RSpec.feature "Upload Manifests", type: :feature, js: true do
 
     fill_in 'manifest[no_of_labwares_required]', with: number_of_containers_required
     click_button 'Next'
-    sleep 1 # Sadly needed right now (I think Capybara tries to attach the file before DOM is ready, and so input[file] onChange event not fired)
+    sleep 1 #  Sadly needed right now (I think Capybara tries to attach the file before DOM is ready, and so input[file] onChange event not fired)
     attach_file 'manifest_upload', file_fixture(manifest_file).realpath, make_visible: true
     sleep 1
   end
@@ -39,7 +37,7 @@ RSpec.feature "Upload Manifests", type: :feature, js: true do
 
   context 'when uploading a Manifest with duplicate Plate IDs' do
     let(:manifest_file) { 'duplicate_plate_ids.xlsx' }
-    include_examples "displays an error", 'Duplicate entry found'
+    include_examples 'displays an error', 'Duplicate entry found'
   end
 
   context 'when uploading a Manifest with fewer plates than Labwares required' do
@@ -62,14 +60,11 @@ RSpec.feature "Upload Manifests", type: :feature, js: true do
     end
 
     it 'fills each table with information from the Manifest' do
-
       first('.close').click
 
       expect(page.find('div.tab-content table')).to have_selector("input[value='supplier name 1']")
       expect(page.find('div.tab-content table')).to have_selector("input[value='donor id 1']")
       expect(page.find('div.tab-content table')).to have_selector("input[value='Red']")
-
-
 
       click_link 'Labware 2'
 
@@ -86,9 +81,8 @@ RSpec.feature "Upload Manifests", type: :feature, js: true do
 
     it 'does not display any error if the contents are right' do
       first('.close').click
-      expect(first("ul.nav.nav-tabs")).not_to have_css('.bg-danger')
+      expect(first('ul.nav.nav-tabs')).not_to have_css('.bg-danger')
     end
-
   end
 
   context 'when uploading a valid Manifest with no Plate ID column' do
@@ -109,7 +103,7 @@ RSpec.feature "Upload Manifests", type: :feature, js: true do
 
   context 'when uploading a manifest that misses or misspells some of the required columns' do
     let(:number_of_containers_required) { 1 }
-    let(:manifest_file) {'incomplete_manifest.csv'}
+    let(:manifest_file) { 'incomplete_manifest.csv' }
     it 'shows the mapping tool to fix the problem' do
       expect(page).to have_content('Select CSV mappings', wait: 10)
     end

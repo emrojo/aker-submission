@@ -1,13 +1,14 @@
+# frozen_string_literal: true
+
 # Given a state from the manifest editor, it performs the actions required from server
 # and returns a new updated version of the state for the client to update its display
 class Manifests::StateController < ApplicationController
-
   # PUT /manifests/state
   def update
     render transformed_response.response
   end
 
-private
+  private
 
   def transformed_response
     @transformed_response ||= TransformedResponse.new(transformer: transformer)
@@ -15,7 +16,7 @@ private
 
   def transformer
     @transformer ||= Transformers::StateToState.new(state: manifest_state, manifest_model: manifest_model,
-      current_user: current_user)
+                                                    current_user: current_user)
   end
 
   # manifest_file is an uploaded file. Will be an instance of ruby IO class (probably File).
@@ -37,6 +38,4 @@ private
   def manifest_model
     @manifest ||= Manifest.find(params[:id])
   end
-
-
 end

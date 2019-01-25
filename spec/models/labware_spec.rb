@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'webmock/rspec'
 
 RSpec.describe Labware, type: :model do
-
-  def make_labware(num_of_rows, num_of_cols, row_is_alpha=false, col_is_alpha=false, attrs=nil)
+  def make_labware(num_of_rows, num_of_cols, row_is_alpha = false, col_is_alpha = false, attrs = nil)
     labware_type = create(:labware_type,
                           num_of_cols: num_of_cols,
                           num_of_rows: num_of_rows,
@@ -12,31 +13,25 @@ RSpec.describe Labware, type: :model do
     manifest = create(:manifest, labware_type: labware_type)
     lw_args = {
       manifest: manifest,
-      labware_index: 1,
+      labware_index: 1
     }
-    if attrs
-      lw_args.merge!(attrs)
-    end
+    lw_args.merge!(attrs) if attrs
     Labware.new(lw_args)
   end
 
-  def make_contents(human, options={})
+  def make_contents(human, options = {})
     c = { 'scientific_name' => (human ? 'Homo Sapiens' : 'Mouse') }
-    if options.has_key? :hmdmc
-      c['hmdmc'] = options[:hmdmc]
-    end
-    if options.has_key? :hmdmc_user
-      c['hmdmc_set_by'] = options[:hmdmc_user]
-    end
-    if options.has_key? :not_required
+    c['hmdmc'] = options[:hmdmc] if options.key? :hmdmc
+    c['hmdmc_set_by'] = options[:hmdmc_user] if options.key? :hmdmc_user
+    if options.key? :not_required
       c['hmdmc_not_required_confirmed_by'] = options[:not_required]
     end
 
-    return c
+    c
   end
 
   describe '#size' do
-    it "returns its size" do
+    it 'returns its size' do
       labware = make_labware(6, 4)
       expect(labware.size).to eq(24)
     end
@@ -55,7 +50,7 @@ RSpec.describe Labware, type: :model do
 
     context 'when col_is_alpha' do
       before do
-        @labware = make_labware(3,2, false, true)
+        @labware = make_labware(3, 2, false, true)
       end
 
       it 'returns an array with letters for columns' do
@@ -76,88 +71,88 @@ RSpec.describe Labware, type: :model do
     end
   end
 
-  describe "#barcode_printed?" do
+  describe '#barcode_printed?' do
     context 'when print_count is zero' do
       before do
-        @labware = make_labware(1,1,false,false, {print_count: 0})
+        @labware = make_labware(1, 1, false, false, print_count: 0)
       end
-      it "is false" do
+      it 'is false' do
         expect(@labware.barcode_printed?).to eq false
       end
     end
     context 'when print_count is 1' do
       before do
-        @labware = make_labware(1,1,false,false, {print_count: 1})
+        @labware = make_labware(1, 1, false, false, print_count: 1)
       end
-      it "is true" do
+      it 'is true' do
         expect(@labware.barcode_printed?).to eq true
       end
     end
     context 'when print_count is more than 1' do
       before do
-        @labware = make_labware(1,1,false,false, {print_count: 2})
+        @labware = make_labware(1, 1, false, false, print_count: 2)
       end
-      it "is true" do
+      it 'is true' do
         expect(@labware.barcode_printed?).to eq true
       end
     end
   end
 
-  describe "#received?" do
-    context "when labware has a reception" do
+  describe '#received?' do
+    context 'when labware has a reception' do
       before do
         @labware = create(:received_labware)
       end
 
-      it "should return true" do
+      it 'should return true' do
         expect(@labware.received?).to eq true
       end
     end
 
-    context "when labware has no reception" do
+    context 'when labware has no reception' do
       before do
         @labware = create(:labware, print_count: 1)
       end
 
-      it "should return false" do
+      it 'should return false' do
         expect(@labware.received?).to eq false
       end
     end
   end
 
-  describe "properties taken from labware type" do
+  describe 'properties taken from labware type' do
     before do
       @lw1 = make_labware(1, 2, false, true)
       @lw2 = make_labware(3, 1, true, false)
     end
 
-    it "should have correct num_of_rows" do
+    it 'should have correct num_of_rows' do
       expect(@lw1.num_of_rows).to eq(1)
       expect(@lw2.num_of_rows).to eq(3)
     end
 
-    it "should have correct num_of_cols" do
+    it 'should have correct num_of_cols' do
       expect(@lw1.num_of_cols).to eq(2)
       expect(@lw2.num_of_cols).to eq(1)
     end
 
-    it "should have correct row_is_alpha" do
+    it 'should have correct row_is_alpha' do
       expect(@lw1.row_is_alpha).to eq(false)
       expect(@lw2.row_is_alpha).to eq(true)
     end
 
-    it "should have correct col_is_alpha" do
+    it 'should have correct col_is_alpha' do
       expect(@lw1.col_is_alpha).to eq(true)
       expect(@lw2.col_is_alpha).to eq(false)
     end
   end
 
-  describe "#increment_print_count!" do
+  describe '#increment_print_count!' do
     before do
-      @labware = make_labware(1,2)
+      @labware = make_labware(1, 2)
     end
 
-    it "should increment the print count" do
+    it 'should increment the print count' do
       expect(@labware.print_count).to eq 0
       @labware.increment_print_count!
       expect(@labware.print_count).to eq 1
@@ -166,121 +161,123 @@ RSpec.describe Labware, type: :model do
     end
   end
 
-  describe "#any_human_material?" do
-    context "when the labware has no contents" do
+  describe '#any_human_material?' do
+    context 'when the labware has no contents' do
       before do
-        @lw = make_labware(1,2)
+        @lw = make_labware(1, 2)
       end
-      it "should not be any human material" do
+      it 'should not be any human material' do
         expect(@lw).not_to be_any_human_material
       end
     end
-    context "when the labware contents are not human" do
+    context 'when the labware contents are not human' do
       before do
-        @lw = make_labware(1,2, false,false, { contents: { "1" => make_contents(false) }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(false) })
       end
-      it "should not be any human material" do
+      it 'should not be any human material' do
         expect(@lw).not_to be_any_human_material
       end
     end
-    context "when the labware has some human material" do
+    context 'when the labware has some human material' do
       before do
         @lw = make_labware(1,
                            2,
                            false,
                            false,
-                           { contents: {"1" => make_contents(false), "2" => make_contents(true) }})
+                           contents: { '1' => make_contents(false), '2' => make_contents(true) })
       end
-      it "should be any human material" do
+      it 'should be any human material' do
         expect(@lw).to be_any_human_material
       end
     end
   end
 
-  describe "#ethical?" do
-    context "when the labware has no contents" do
+  describe '#ethical?' do
+    context 'when the labware has no contents' do
       before do
-        @lw = make_labware(1,2)
+        @lw = make_labware(1, 2)
       end
-      it "should be ethical" do
+      it 'should be ethical' do
         expect(@lw).to be_ethical
       end
     end
-    context "when the labware has no human material" do
+    context 'when the labware has no human material' do
       before do
-        @lw = make_labware(1,2, false,false, { contents: { "1" => make_contents(false) }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(false) })
       end
-      it "should be ethical" do
+      it 'should be ethical' do
         expect(@lw).to be_ethical
       end
     end
-    context "when the labware has human material with no HMDMC info" do
+    context 'when the labware has human material with no HMDMC info' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: {"1" => make_contents(true) }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true) })
       end
-      it "should not be ethical" do
+      it 'should not be ethical' do
         expect(@lw).not_to be_ethical
       end
     end
-    context "when the material has an HMDMC number but no HMDMC user" do
+    context 'when the material has an HMDMC number but no HMDMC user' do
       before do
-        @lw = make_labware(1,2, false,false, { contents: { "1" => make_contents(true, hmdmc: '12/345') }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true, hmdmc: '12/345') })
       end
-      it "should not be ethical" do
+      it 'should not be ethical' do
         expect(@lw).not_to be_ethical
       end
     end
-    context "when the material has an HMDMC user but no HMDMC number" do
+    context 'when the material has an HMDMC user but no HMDMC number' do
       before do
-        @lw = make_labware(1,2, false,false, { contents: { "1" => make_contents(true, hmdmc_user: 'dirk') }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true, hmdmc_user: 'dirk') })
       end
-      it "should not be ethical" do
+      it 'should not be ethical' do
         expect(@lw).not_to be_ethical
       end
     end
 
-    context "when the material is confirmed not to need an HMDMC" do
+    context 'when the material is confirmed not to need an HMDMC' do
       before do
         @lw = make_labware(
           1,
           2,
           false,
           false,
-          { contents: { "1" => make_contents(true, not_required: 'dirk') }})
+          contents: { '1' => make_contents(true, not_required: 'dirk') }
+        )
       end
-      it "should be ethical" do
+      it 'should be ethical' do
         expect(@lw).to be_ethical
       end
     end
 
-    context "when there is conflicting HMDMC information" do
+    context 'when there is conflicting HMDMC information' do
       before do
         @lw = make_labware(
           1,
           2,
           false,
           false,
-          { contents: {
-            "1" => make_contents(true, not_required: 'dirk', hmdmc: '12/345', hmdmc_user: 'dirk')
-          }})
+          contents: {
+            '1' => make_contents(true, not_required: 'dirk', hmdmc: '12/345', hmdmc_user: 'dirk')
+          }
+        )
       end
-      it "should not be ethical" do
+      it 'should not be ethical' do
         expect(@lw).not_to be_ethical
       end
     end
-    context "when some material has HMDMC and some is not human" do
+    context 'when some material has HMDMC and some is not human' do
       before do
-        @lw = make_labware(1,2, false,false, { contents: { "1" => make_contents(true, hmdmc: '12/345', hmdmc_user: 'dirk'), "2" => make_contents(false) }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true, hmdmc: '12/345', hmdmc_user: 'dirk'), '2' => make_contents(false) })
       end
-      it "should be ethical" do
+      it 'should be ethical' do
         expect(@lw).to be_ethical
       end
     end
-    context "when some material has HMDMC and some is missing HMDMC" do
+    context 'when some material has HMDMC and some is missing HMDMC' do
       before do
-        @lw = make_labware(1,2, false,false, { contents: { "1" => make_contents(true, hmdmc: '12/345', hmdmc_user: 'dirk'), "2" => make_contents(true) }})
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true, hmdmc: '12/345', hmdmc_user: 'dirk'), '2' => make_contents(true) })
       end
-      it "should not be ethical" do
+      it 'should not be ethical' do
         expect(@lw).not_to be_ethical
       end
     end
@@ -293,38 +290,31 @@ RSpec.describe Labware, type: :model do
         2,
         false,
         false,
-        { contents: {
-          '1' => make_contents(true, {hmdmc: '99/999'}),
-          '2' => make_contents(true, {hmdmc: ''}),
+        contents: {
+          '1' => make_contents(true, hmdmc: '99/999'),
+          '2' => make_contents(true, hmdmc: ''),
           '3' => make_contents(true, {}),
           '4' => make_contents(false, {})
-        }})
+        }
+      )
 
       @lw.set_hmdmc_not_required('dirk')
     end
 
     it 'should not update fields with an HMDMC number already set' do
-      expect(@lw.contents['1']).to eq({
-          'scientific_name' => 'Homo Sapiens',
-          'hmdmc' => '99/999',
-        })
+      expect(@lw.contents['1']).to eq('scientific_name' => 'Homo Sapiens',
+                                      'hmdmc' => '99/999')
     end
     it 'should update fields with a blank HMDMC' do
-      expect(@lw.contents['2']).to eq({
-          'scientific_name' => 'Homo Sapiens',
-          'hmdmc_not_required_confirmed_by' => 'dirk'
-        })
+      expect(@lw.contents['2']).to eq('scientific_name' => 'Homo Sapiens',
+                                      'hmdmc_not_required_confirmed_by' => 'dirk')
     end
     it 'should update fields without HMDMC' do
-      expect(@lw.contents['3']).to eq({
-          'scientific_name' => 'Homo Sapiens',
-          'hmdmc_not_required_confirmed_by' => 'dirk'
-        })
+      expect(@lw.contents['3']).to eq('scientific_name' => 'Homo Sapiens',
+                                      'hmdmc_not_required_confirmed_by' => 'dirk')
     end
     it 'should not update the fields on non-human material' do
-      expect(@lw.contents['4']).to eq({
-          'scientific_name' => 'Mouse',
-        })
+      expect(@lw.contents['4']).to eq('scientific_name' => 'Mouse')
     end
   end
 
@@ -335,74 +325,71 @@ RSpec.describe Labware, type: :model do
         2,
         false,
         false,
-        { contents: {
+        contents: {
           '1' => make_contents(true, hmdmc_user: 'jeff'),
           '2' => make_contents(false, hmdmc: '99/999')
-        }})
+        }
+      )
 
       @lw.clear_hmdmc
     end
     it 'should correct set the fields on the human material' do
-      expect(@lw.contents['1']).to eq({
-          'scientific_name' => 'Homo Sapiens',
-        })
+      expect(@lw.contents['1']).to eq('scientific_name' => 'Homo Sapiens')
     end
     it 'should correct set the fields on the nonhuman material' do
-      expect(@lw.contents['2']).to eq({
-          'scientific_name' => 'Mouse',
-        })
+      expect(@lw.contents['2']).to eq('scientific_name' => 'Mouse')
     end
   end
 
-  describe "#first_hmdmc" do
-    context "when the labware has no contents" do
+  describe '#first_hmdmc' do
+    context 'when the labware has no contents' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: nil })
+        @lw = make_labware(1, 2, false, false, contents: nil)
       end
-      it "should return nil" do
+      it 'should return nil' do
         expect(@lw.first_hmdmc).to be_nil
       end
     end
-    context "when the labware has human contents but no HMDMC" do
+    context 'when the labware has human contents but no HMDMC' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: {"1" => make_contents(true) } })
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true) })
       end
-      it "should return nil" do
+      it 'should return nil' do
         expect(@lw.first_hmdmc).to be_nil
       end
     end
-    context "when the labware has human contents with an HMDMC" do
+    context 'when the labware has human contents with an HMDMC' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: {"1" => make_contents(true, hmdmc: '12/345') } })
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true, hmdmc: '12/345') })
       end
-      it "should return the HMDMC" do
+      it 'should return the HMDMC' do
         expect(@lw.first_hmdmc).to eq('12/345')
       end
     end
   end
 
-  describe "#confirmed_no_hmdmc?" do
-    context "when the labware has no contents" do
+  describe '#confirmed_no_hmdmc?' do
+    context 'when the labware has no contents' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: nil })
+        @lw = make_labware(1, 2, false, false, contents: nil)
       end
-      it "should return false" do
+      it 'should return false' do
         expect(@lw.confirmed_no_hmdmc?).to be_falsey
       end
     end
-    context "when the labware has human contents but not confirmed no HMDMC" do
+    context 'when the labware has human contents but not confirmed no HMDMC' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: {"1" => make_contents(true) } })
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true) })
       end
-      it "should return false" do
+      it 'should return false' do
         expect(@lw.confirmed_no_hmdmc?).to be_falsey
       end
     end
-    context "when the labware has human contents and confirmed no HMDMC" do
+    context 'when the labware has human contents and confirmed no HMDMC' do
       before do
-        @lw = make_labware(1, 2, false, false, { contents: {"1" => make_contents(true, not_required: 'dirk') } })
+        @lw = make_labware(1, 2, false, false, contents: { '1' => make_contents(true, not_required: 'dirk') })
       end
-      it "should return true" do
+      it 'should return true' do
         expect(@lw.confirmed_no_hmdmc?).to be_truthy
       end
     end

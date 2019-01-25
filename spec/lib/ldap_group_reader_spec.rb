@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'ldap_group_reader'
 
@@ -10,7 +12,7 @@ RSpec.describe LDAPGroupReader do
     {
       'base' => person_base,
       'group_base' => group_base,
-      'group_membership_attribute' => member_attr,
+      'group_membership_attribute' => member_attr
     }
   end
 
@@ -21,14 +23,14 @@ RSpec.describe LDAPGroupReader do
 
   describe '#fetch_members' do
     let(:group_name) { 'mygroup' }
-    let(:group_filter) {
+    let(:group_filter) do
       Net::LDAP::Filter.eq('cn', group_name) & Net::LDAP::Filter.eq('objectclass', 'posixGroup')
-    }
+    end
 
     before do
-      allow(ldap).to receive(:search).
-        with(filter: group_filter, base: group_base, attributes: [member_attr]).
-        and_return(found_groups)
+      allow(ldap).to receive(:search)
+        .with(filter: group_filter, base: group_base, attributes: [member_attr])
+        .and_return(found_groups)
     end
 
     context 'when the group does not exist' do
@@ -56,25 +58,25 @@ RSpec.describe LDAPGroupReader do
       end
 
       context 'when the group has members' do
-        let(:member_uids) { ['alpha', 'beta', 'gamma'] }
+        let(:member_uids) { %w[alpha beta gamma] }
         let(:ldap_group_members) { member_uids.map { |uid| "uid=#{uid},#{person_base}" } }
 
         let(:ldap_people) do
           member_uids.map { |uid| double('ldap-person', cn: ["#{uid} mc#{uid}"], mail: ["#{uid}@place.com"]) }
         end
 
-        let(:person_filter) {
+        let(:person_filter) do
           Net::LDAP::Filter.eq('uid', 'alpha') | Net::LDAP::Filter.eq('uid', 'beta') | Net::LDAP::Filter.eq('uid', 'gamma')
-        }
+        end
 
-        let(:active_person_filter) {
+        let(:active_person_filter) do
           person_filter & LDAPGroupReader.send(:active_people_filter)
-        }
+        end
 
         before do
-          allow(ldap).to receive(:search).
-            with(filter: active_person_filter, base: person_base, attributes: ['cn', 'mail']).
-            and_return(ldap_people)
+          allow(ldap).to receive(:search)
+            .with(filter: active_person_filter, base: person_base, attributes: %w[cn mail])
+            .and_return(ldap_people)
         end
 
         it 'should return correct contacts' do

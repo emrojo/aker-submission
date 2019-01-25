@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 module SchemaValidators
   module BiomaterialSchemaPropertyValidators
     class RequiredFieldValidator < BiomaterialSchemaPropertyValidator
-      def self.is_applicable?(property_name, property_data)
+      def self.is_applicable?(_property_name, property_data)
         property_data['required']
       end
 

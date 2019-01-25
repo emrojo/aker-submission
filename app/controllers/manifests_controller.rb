@@ -1,14 +1,15 @@
+# frozen_string_literal: true
+
 require 'ehmdmc_client'
 
 class ManifestsController < ApplicationController
-
   def schema
-    render :json => MatconClient::Material.schema
+    render json: MatconClient::Material.schema
   end
 
   # Action to handle validating HMDMC from JavaScript
   def hmdmc_validate
-    render :json => EHMDMCClient.validate_hmdmc(params[:hmdmc]).to_json
+    render json: EHMDMCClient.validate_hmdmc(params[:hmdmc]).to_json
   end
 
   def index
@@ -34,10 +35,10 @@ class ManifestsController < ApplicationController
     @manifest = Manifest.find(params[:id])
 
     if @manifest.pending? && @manifest.destroy
-      flash[:notice] = "Your manifest has been cancelled"
+      flash[:notice] = 'Your manifest has been cancelled'
       redirect_to manifests_path
     else
-      flash[:error] = "Manifest could not be cancelled"
+      flash[:error] = 'Manifest could not be cancelled'
       redirect_to manifest_build_path manifest_id: @manifest.id
     end
   end
@@ -46,10 +47,9 @@ class ManifestsController < ApplicationController
     @manifest = Manifest.find(params[:id])
   end
 
-private
+  private
 
   def user_manifests
     Manifest.for_user(current_user).order(id: :desc).includes(:labware_type)
   end
-
 end

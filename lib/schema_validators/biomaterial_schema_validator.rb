@@ -1,11 +1,12 @@
+# frozen_string_literal: true
+
 module SchemaValidators
   class BiomaterialSchemaValidator
-
     @@VALIDATION_CLASSES = [
       SchemaValidators::BiomaterialSchemaPropertyValidators::RequiredFieldValidator,
       SchemaValidators::BiomaterialSchemaPropertyValidators::AllowedValuesValidator,
       SchemaValidators::BiomaterialSchemaPropertyValidators::TaxonIdValidator,
-      SchemaValidators::BiomaterialSchemaPropertyValidators::HmdmcValidator,
+      SchemaValidators::BiomaterialSchemaPropertyValidators::HmdmcValidator
     ]
 
     def self.VALIDATION_CLASSES
@@ -16,7 +17,6 @@ module SchemaValidators
     attr_accessor :error_messages
     attr_accessor :validators
 
-
     def initialize(schema)
       @schema = schema
       @error_messages = []
@@ -26,9 +26,9 @@ module SchemaValidators
     # Get a field from the schema, not caring too much about which one
     def default_field
       sr = @schema['required']
-      return sr.first.to_sym if sr && !sr.empty?
+      return sr.first.to_sym if sr.present?
       sp = @schema['properties']
-      return sp.keys.first.to_sym if sp && !sp.empty?
+      return sp.keys.first.to_sym if sp.present?
       nil
     end
 
@@ -52,7 +52,7 @@ module SchemaValidators
     private
 
     def build_validators(schema)
-      @validators = schema['properties'].keys.reduce({}) do |memo, property_name|
+      @validators = schema['properties'].keys.each_with_object({}) do |property_name, memo|
         property_data = schema['properties'][property_name]
 
         memo[property_name] = self.class.VALIDATION_CLASSES.select do |klass|
@@ -60,10 +60,7 @@ module SchemaValidators
         end.map do |klass|
           klass.new(self, property_name, property_data)
         end
-
-        memo
       end
     end
   end
-
 end

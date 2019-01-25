@@ -1,9 +1,10 @@
+# frozen_string_literal: true
+
 # This service tries to execute a sequence of steps.
 # If any of the steps fails, that step and all previous steps should be rolled back.
 # If all steps succeed, process should return true.
 # If any steps fail, and roll back is successful, process should return false.
 class DispatchService
-
   def process(steps)
     passed = []
     current_step = nil
@@ -15,21 +16,18 @@ class DispatchService
         current_step = nil
       end
     rescue => e
-      Rails.logger.error "A step failed in the dispatch service:"
+      Rails.logger.error 'A step failed in the dispatch service:'
       Rails.logger.error e
-      e.backtrace.each { |x| Rails.logger.error x}
+      e.backtrace.each { |x| Rails.logger.error x }
       raise
     ensure
       unless current_step.nil?
         # clean up
         current_step.down
-        passed.reverse_each do |step|
-          step.down
-        end
+        passed.reverse_each(&:down)
         return false
       end
     end
-    return true
+    true
   end
-
 end

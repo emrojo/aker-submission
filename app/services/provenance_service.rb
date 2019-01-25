@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'schema_validators'
 
 # Service to deal with complicated "provenance" (i.e. data fields for biomaterial)
 class ProvenanceService
-
   attr_accessor :schema_validator
 
   def initialize(schema)
@@ -16,13 +17,13 @@ class ProvenanceService
 
     if labware_data.empty? && !schema_validator.default_field.nil?
       schema_validator.error_messages = [{
-        errors: { schema_validator.default_field => "At least one material must be specified for each item of labware" },
+        errors: { schema_validator.default_field => 'At least one material must be specified for each item of labware' },
         labwareIndex: labware_index,
         address: labware_data.keys.first,
-        update_successful: false,
+        update_successful: false
       }]
     else
-      #return [] if labware_data.empty?
+      # return [] if labware_data.empty?
 
       labware_data.each do |address, bio_data|
         schema_validator.validate(labware_index, address, bio_data)
@@ -45,22 +46,21 @@ class ProvenanceService
 
     # remove null or empty data from the params
     manifest.labwares.each_with_index do |labware, position|
-      #position = labware.position
-      labware_data = labware_params[(position).to_s]
+      # position = labware.position
+      labware_data = labware_params[position.to_s]
       filtered_data = {}
       supplier_plate_name = ''
 
       if labware_data
-        supplier_plate_name = labware_data["supplier_plate_name"].strip if labware_data["supplier_plate_name"]
-        labware_data["contents"].each do |address, material_data|
+        supplier_plate_name = labware_data['supplier_plate_name'].strip if labware_data['supplier_plate_name']
+        labware_data['contents'].each do |address, material_data|
           material_data.each do |fieldName, value|
-            unless value.blank?
-              filtered_data[address] = {} if filtered_data[address].nil?
-              filtered_data[address][fieldName] = value.to_s.strip()
+            next if value.blank?
+            filtered_data[address] = {} if filtered_data[address].nil?
+            filtered_data[address][fieldName] = value.to_s.strip
 
-              # Add HMDMC set_by field for each sample
-              filtered_data[address]['hmdmc_set_by'] = current_user.email if fieldName == 'hmdmc'
-            end
+            # Add HMDMC set_by field for each sample
+            filtered_data[address]['hmdmc_set_by'] = current_user.email if fieldName == 'hmdmc'
           end
         end
       end
@@ -71,7 +71,6 @@ class ProvenanceService
       all_errors += error_messages unless error_messages.empty?
     end
     success &= all_errors.empty?
-    return success, all_errors
+    [success, all_errors]
   end
-
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Transformers
   class StateToState
     def initialize(options)

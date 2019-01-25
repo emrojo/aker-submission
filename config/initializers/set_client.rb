@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Rails.application.config.after_initialize do
   SetClient::Base.site = Rails.application.config.set_url
 

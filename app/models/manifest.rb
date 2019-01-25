@@ -1,5 +1,6 @@
-class Manifest < ApplicationRecord
+# frozen_string_literal: true
 
+class Manifest < ApplicationRecord
   def self.ACTIVE
     'active'
   end
@@ -12,13 +13,11 @@ class Manifest < ApplicationRecord
     'broken'
   end
 
-
   belongs_to :labware_type, optional: true
   belongs_to :contact, optional: true
   accepts_nested_attributes_for :contact, update_only: true
 
   has_many :labwares, -> { order(:labware_index) }, dependent: :destroy
-
 
   validates :no_of_labwares_required,
             numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 10 },
@@ -31,7 +30,7 @@ class Manifest < ApplicationRecord
   validate :each_labware_has_contents, if: :last_step?
   validates :manifest_uuid, presence: true
   validates :owner_email, presence: true
-  validates :status, inclusion: { in: %w(printed) }, if: :dispatch_date_changed?
+  validates :status, inclusion: { in: %w[printed] }, if: :dispatch_date_changed?
 
   before_validation :sanitise_owner
   before_save :sanitise_owner
@@ -70,7 +69,7 @@ class Manifest < ApplicationRecord
   end
 
   def labware_or_later?
-    return ['labware', 'provenance', 'ethics', 'dispatch'].include?(status)
+    %w[labware provenance ethics dispatch].include?(status)
   end
 
   def active_or_provenance?
@@ -91,16 +90,16 @@ class Manifest < ApplicationRecord
   def after_provenance?
     return false if labwares.blank?
     return false unless status
-    return false if ['labware', 'provenance'].include?(status)
-    return labwares.all? { |labware| labware.contents.present? }
+    return false if %w[labware provenance].include?(status)
+    labwares.all? { |labware| labware.contents.present? }
   end
 
   def pending?
-    status.nil? || ['labware', 'provenance', 'ethics', 'dispatch'].include?(status)
+    status.nil? || %w[labware provenance ethics dispatch].include?(status)
   end
 
   def broken?
-    return status == Manifest.BROKEN
+    status == Manifest.BROKEN
   end
 
   def broken!
@@ -124,15 +123,15 @@ class Manifest < ApplicationRecord
   end
 
   def any_human_material?
-    labwares && labwares.any? { |lw| lw.any_human_material? }
+    labwares&.any?(&:any_human_material?)
   end
 
   def any_human_material_no_hmdmc?
-    labwares && labwares.any? { |lw| lw.any_human_material_no_hmdmc? }
+    labwares&.any?(&:any_human_material_no_hmdmc?)
   end
 
   def ethical?
-    labwares && labwares.all? { |lw| lw.ethical? }
+    labwares&.all?(&:ethical?)
   end
 
   def set_hmdmc_not_required(username)
@@ -142,7 +141,7 @@ class Manifest < ApplicationRecord
 
   def clear_hmdmc
     return if labwares.nil?
-    labwares.each { |lw| lw.clear_hmdmc }
+    labwares.each(&:clear_hmdmc)
   end
 
   def first_hmdmc
@@ -155,7 +154,7 @@ class Manifest < ApplicationRecord
   end
 
   def confirmed_no_hmdmc?
-    labwares && labwares.any? { |lw| lw.confirmed_no_hmdmc? }
+    labwares&.any?(&:confirmed_no_hmdmc?)
   end
 
   # Return the user who confirmed the HMDMC
@@ -173,7 +172,7 @@ class Manifest < ApplicationRecord
 
   # Returns a set of all unique HMDMC numbers in the manifest
   def hmdmc_set
-    hmdmcs = Set.new()
+    hmdmcs = Set.new
     return hmdmcs if labwares.nil?
     labwares.each do |lw|
       hmdmcs.merge(lw.hmdmc_set)
@@ -190,9 +189,7 @@ class Manifest < ApplicationRecord
   def sanitise_owner
     if owner_email
       sanitised = owner_email.strip.downcase
-      if sanitised != owner_email
-        self.owner_email = sanitised
-      end
+      self.owner_email = sanitised if sanitised != owner_email
     end
   end
 

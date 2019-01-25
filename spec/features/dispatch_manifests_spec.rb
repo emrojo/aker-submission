@@ -1,30 +1,29 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.feature "DispatchManifests", type: :feature do
-
+RSpec.feature 'DispatchManifests', type: :feature do
   before do
     login
   end
 
   describe '#index' do
-
     it 'displays the "Dispatch Labware" title' do
       visit manifests_dispatch_index_path
-      expect(page).to have_text("Dispatch Labware")
+      expect(page).to have_text('Dispatch Labware')
     end
 
-    it "gives some helpful text" do
+    it 'gives some helpful text' do
       visit manifests_dispatch_index_path
-      expect(page).to have_text("These customers are expecting labels or barcoded labware")
+      expect(page).to have_text('These customers are expecting labels or barcoded labware')
     end
 
     it 'shows a link to Previously Dispatched Manifests' do
       visit manifests_dispatch_index_path
-      expect(page).to have_button("View Previously Dispatched Manifests")
+      expect(page).to have_button('View Previously Dispatched Manifests')
     end
 
     context 'when there are no Manifests that need dispatching' do
-
       before do
         visit manifests_dispatch_index_path
       end
@@ -32,11 +31,9 @@ RSpec.feature "DispatchManifests", type: :feature do
       it 'disables the Dispatch button' do
         expect(page.find('input[type="submit"]')).to be_disabled
       end
-
     end
 
     context 'when there are Manifests that need dispatching' do
-
       before do
         @active_manifests = create_list(:active_manifest, 3)
         @printed_manifests = create_list(:printed_manifest, 3)
@@ -65,13 +62,10 @@ RSpec.feature "DispatchManifests", type: :feature do
       it 'does not disable the Print button' do
         expect(page.find('input[type="submit"]')).to_not be_disabled
       end
-
     end
-
   end
 
   describe '#update' do
-
     before do
       @printed_manifests = create_list(:printed_manifest, 3)
 
@@ -81,7 +75,7 @@ RSpec.feature "DispatchManifests", type: :feature do
 
     let(:dispatch_submissions) do
       @submissions_to_dispatch.each { |ss| page.check(option: ss.id) }
-      click_button "Dispatch"
+      click_button 'Dispatch'
     end
 
     it 'dispatches those Manifests' do
@@ -91,12 +85,12 @@ RSpec.feature "DispatchManifests", type: :feature do
 
     it 'updates each Manifest\'s "dispatched?" to true' do
       expect { dispatch_submissions }.to change { @submissions_to_dispatch.first.reload.dispatched? }.from(false).to(true)
-        .and change { @submissions_to_dispatch.last.reload.dispatched? }.from(false).to(true)
+                                                                                                     .and change { @submissions_to_dispatch.last.reload.dispatched? }.from(false).to(true)
     end
 
     context 'when no Manifests are selected' do
       let(:dispatch_with_no_submissions_selected) do
-        click_button "Dispatch"
+        click_button 'Dispatch'
       end
 
       it 'shows an error' do
@@ -104,6 +98,5 @@ RSpec.feature "DispatchManifests", type: :feature do
         expect(page).to have_text('You must select at least one Manifest to dispatch.')
       end
     end
-
   end
 end

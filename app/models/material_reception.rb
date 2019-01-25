@@ -1,7 +1,8 @@
-class MaterialReception < ApplicationRecord
+# frozen_string_literal: true
 
+class MaterialReception < ApplicationRecord
   belongs_to :labware
-  validates :labware_id, uniqueness: { message: "already received" }
+  validates :labware_id, uniqueness: { message: 'already received' }
   validate :barcode_printed?, on: :create
   validate :barcode_dispatched?, on: :create
 
@@ -10,13 +11,13 @@ class MaterialReception < ApplicationRecord
   end
 
   def presenter
-    if errors.any? or invalid?
-      { :error => errors.full_messages.to_sentence }
+    if errors.any? || invalid?
+      { error: errors.full_messages.to_sentence }
     else
       {
-        :labware => { :barcode => barcode_value},
-        :created_at => created_at,
-        :updated_at => created_at
+        labware: { barcode: barcode_value },
+        created_at: created_at,
+        updated_at: created_at
       }
     end
   end
@@ -26,22 +27,21 @@ class MaterialReception < ApplicationRecord
     labware.manifest.labwares.all?(&:received?)
   end
 
-private
+  private
 
   def barcode_printed?
     return unless labware
 
-    if not labware.barcode_printed?
-      errors.add(:labware, "barcode has not been printed. Please contact the administrator.")
+    unless labware.barcode_printed?
+      errors.add(:labware, 'barcode has not been printed. Please contact the administrator.')
     end
   end
 
   def barcode_dispatched?
     return unless labware
 
-    if not labware.barcode_dispatched?
-      errors.add(:labware, "barcode has not been dispatched prior reception. Please contact the administrator.")
+    unless labware.barcode_dispatched?
+      errors.add(:labware, 'barcode has not been dispatched prior reception. Please contact the administrator.')
     end
   end
-
 end

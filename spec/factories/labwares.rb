@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :labware do
     sequence(:labware_index) { |n| n }
@@ -28,10 +30,10 @@ FactoryBot.define do
     end
 
     factory :barcoded_labware, traits: [:has_barcode]
-    factory :printed_labware, traits: [:has_barcode, :printed]
-    factory :printed_with_contents_labware, traits: [:has_barcode, :printed, :has_contents]
-    factory :dispatched_labware, traits: [:has_barcode, :has_contents, :printed, :dispatched]
-    factory :received_labware, traits: [:has_barcode, :has_contents, :printed, :dispatched, :received]
+    factory :printed_labware, traits: %i[has_barcode printed]
+    factory :printed_with_contents_labware, traits: %i[has_barcode printed has_contents]
+    factory :dispatched_labware, traits: %i[has_barcode has_contents printed dispatched]
+    factory :received_labware, traits: %i[has_barcode has_contents printed dispatched received]
   end
 
   sequence :labware_barcode do |n|

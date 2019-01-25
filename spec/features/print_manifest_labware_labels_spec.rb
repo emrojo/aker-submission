@@ -1,30 +1,29 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
-RSpec.feature "PrintManifestLabwareLabels", type: :feature do
-
+RSpec.feature 'PrintManifestLabwareLabels', type: :feature do
   before do
     login
   end
 
   describe '#index' do
-
     it 'displays the "Dispatch Labware" title' do
       visit manifests_print_index_path
-      expect(page).to have_text("Dispatch Labware")
+      expect(page).to have_text('Dispatch Labware')
     end
 
-    it "gives some helpful text" do
+    it 'gives some helpful text' do
       visit manifests_print_index_path
-      expect(page).to have_text("These Manifests need labels printing")
+      expect(page).to have_text('These Manifests need labels printing')
     end
 
     it 'shows a button "Show Previously Printed Manifests"' do
       visit manifests_print_index_path
-      expect(page).to have_button("View Previously Printed Manifests")
+      expect(page).to have_button('View Previously Printed Manifests')
     end
 
     context 'when there are no Manifests that need printing' do
-
       before do
         visit manifests_print_index_path
       end
@@ -32,11 +31,9 @@ RSpec.feature "PrintManifestLabwareLabels", type: :feature do
       it 'disables the Print button' do
         expect(page.find('input[type="submit"]')).to be_disabled
       end
-
     end
 
     context 'when there are Manifests that need printing' do
-
       before do
         @active_manifests = create_list(:active_manifest, 3)
         @printed_manifests = create_list(:printed_manifest, 3)
@@ -58,13 +55,10 @@ RSpec.feature "PrintManifestLabwareLabels", type: :feature do
       it 'does not disable the Print button' do
         expect(page.find('input[type="submit"]')).to_not be_disabled
       end
-
     end
-
   end
 
   describe '#post' do
-
     before do
       @printers = create_list(:printer, 5)
       @active_manifests = create_list(:active_manifest, 3)
@@ -77,7 +71,7 @@ RSpec.feature "PrintManifestLabwareLabels", type: :feature do
     let(:print_manifests) do
       @manifests_to_print.each { |ss| page.check(option: ss.id) }
       select @printers.first.name, from: 'printer[name]'
-      click_button "Print"
+      click_button 'Print'
     end
 
     it 'prints those Manifests' do
@@ -88,7 +82,7 @@ RSpec.feature "PrintManifestLabwareLabels", type: :feature do
 
     it 'updates each Manifest\'s status to "printed"' do
       expect { print_manifests }.to change { @manifests_to_print.first.reload.status }.from('active').to('printed')
-        .and change { @manifests_to_print.last.reload.status }.from('active').to('printed')
+                                                                                      .and change { @manifests_to_print.last.reload.status }.from('active').to('printed')
     end
 
     it 'increments each Manifest\'s Labware\'s print count' do
@@ -99,13 +93,13 @@ RSpec.feature "PrintManifestLabwareLabels", type: :feature do
       ].flatten
 
       expect { print_manifests }.to change { labwares.first.reload.print_count }.by(1)
-        .and change { labwares.second.reload.print_count }.by(0) # Labware not in @manifests_to_print
-        .and change { labwares.third.reload.print_count }.by(1)
+                                                                                .and change { labwares.second.reload.print_count }.by(0) # Labware not in @manifests_to_print
+                                                                                                                                  .and change { labwares.third.reload.print_count }.by(1)
     end
 
     context 'when no Manifests are selected' do
       let(:print_with_no_manifests_selected) do
-        click_button "Print"
+        click_button 'Print'
       end
 
       it 'shows an error' do

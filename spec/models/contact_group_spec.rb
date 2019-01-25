@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 require 'ldap_group_reader'
 
 RSpec.describe ContactGroup, type: :model do
-
   describe '#name' do
     it 'should be sanitised' do
       expect(create(:contact_group, name: '  ALPHA  ').name).to eq('alpha')
@@ -39,7 +40,7 @@ RSpec.describe ContactGroup, type: :model do
     let(:members) do
       [
         Contact.new(email: 'alpha@omega', fullname: 'Alabama'),
-        Contact.new(email: 'beta@psi', fullname: 'Pennsylvester'),
+        Contact.new(email: 'beta@psi', fullname: 'Pennsylvester')
       ]
     end
 
@@ -57,7 +58,7 @@ RSpec.describe ContactGroup, type: :model do
     let(:members_0) do
       [
         Contact.new(email: 'alpha@omega', fullname: 'Alabama'),
-        Contact.new(email: 'beta@psi', fullname: 'Pennsylvester'),
+        Contact.new(email: 'beta@psi', fullname: 'Pennsylvester')
       ]
     end
     let(:members_1) do
@@ -79,7 +80,7 @@ RSpec.describe ContactGroup, type: :model do
     it 'returns the correct contacts' do
       expected = members_0 + [@preexisting_contact]
       expect(@members.length).to eq(expected.length)
-      @members.zip(expected).each do |m,e|
+      @members.zip(expected).each do |m, e|
         expect(m.email).to eq(e.email)
         expect(m.fullname).to eq(e.fullname)
         expect(m.id).not_to be_nil
