@@ -1,6 +1,9 @@
 import C from './constants'
 import Reception from '../routes.js.erb'
 import $ from 'jquery'
+import { debounce, throttle } from 'throttle-debounce'
+
+const DEBOUNCED_SAVE_TIMEOUT = 1000
 
 export const matchSelection = (expected, observed) => {
   return {
@@ -111,7 +114,15 @@ export const updateScientificName = (labwareId, address, fieldName, taxId, plate
   }
 }
 
+const isAbortedRequest = (xhr) => {
+  return ((xhr.status === 0) && (xhr.statusText === 'abort'))
+}
+
 export const showManifestUploadError = (dispatch, xhr) => {
+  if (isAbortedRequest(xhr)) {
+    return
+  }
+
   dispatch(displayMessage({
     labwareIndex: null,
     address: null,
@@ -121,19 +132,65 @@ export const showManifestUploadError = (dispatch, xhr) => {
   }))
 }
 
+const tabSaveArguments = {}
+
+const debouncedSaveTab = debounce(DEBOUNCED_SAVE_TIMEOUT, () => {
+  const {form, dispatch,getState} = tabSaveArguments
+
+  const state = getState()
+  const manifestId = state.manifest.manifest_id
+  const path = Reception.manifests_state_path(manifestId)
+
+  if ((window.storedRequest) && (window.storedRequest.abort)) {
+    window.storedRequest.abort()
+    window.storedRequest=null
+  }
+
+  const request = $.ajax(path, {
+    method: 'PUT',
+    contentType: 'application/json',
+    dataType: 'json',
+    data: JSON.stringify(getState())
+  })
+  window.storedRequest = request
+
+  request.then((data) => {
+    dispatch(loadManifest(data.contents))
+  }, $.proxy(showManifestUploadError, this, dispatch))
+  return request
+})
+
 export const saveTab = (form) => {
+  return (dispatch, getState) => {
+    tabSaveArguments.form = form
+    tabSaveArguments.dispatch = dispatch
+    tabSaveArguments.getState = getState
+
+    debouncedSaveTab()
+  }
+}
+
+export const saveDirectTab = (form) => {
   return (dispatch, getState) => {
     const state = getState()
     const manifestId = state.manifest.manifest_id
     const path = Reception.manifests_state_path(manifestId)
-    return $.ajax(path, {
+
+    if ((window.storedRequest) && (window.storedRequest.abort)) {
+      window.storedRequest.abort()
+      window.storedRequest=null
+    }
+    const request = $.ajax(path, {
       method: 'PUT',
       contentType: 'application/json',
       dataType: 'json',
       data: JSON.stringify(getState())
-    }).then((data) => {
+    })
+    request.then((data) => {
       dispatch(loadManifest(data.contents))
     }, $.proxy(showManifestUploadError, this, dispatch))
+    window.storedRequest = request
+    return request
   }
 }
 
